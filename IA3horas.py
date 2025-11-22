@@ -3,139 +3,127 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import plotly.graph_objects as go
+import time
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
-st.set_page_config(page_title="Petroperú AI Financial Monitor", layout="wide")
+st.set_page_config(page_title="Petroperú AI Assistant", layout="wide", page_icon="🤖")
 
-# --- SIDEBAR: CONTEXTO ---
+# --- SIDEBAR ---
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Petroper%C3%fa_logo.svg/1200px-Petroper%C3%fa_logo.svg.png", width=150)
-    st.header("📉 Contexto Financiero")
-    st.info("Datos públicos referenciales")
-    st.metric("Deuda Total", "$8.5 B", delta="Refinería Talara", delta_color="inverse")
-    st.write("---")
-    st.caption("Benchmarking de Industria:")
-    st.caption("✅ Eficiencia Operativa: +25%")
-    st.caption("✅ Reducción de Riesgo: -40%")
+    st.header("📉 Datos Maestros")
+    st.info("Parámetros Financieros 2025")
+    st.metric("Deuda LP", "$8.5 B", "Refinería Talara")
+    st.markdown("---")
+    st.write("Este sistema utiliza IA Generativa simulada para asistir en la toma de decisiones.")
 
-# --- FUNCIONES DE DATOS Y MODELO ---
+# --- FUNCIONES MATEMÁTICAS (Backend) ---
 def get_financial_data():
     days = 30
     dates = pd.date_range(end=pd.Timestamp.now(), periods=days)
     wti_price = np.random.normal(75, 3, days)
     debt_obligations = np.random.normal(2, 0.1, days)
     cash_flow = (wti_price * 0.8) - (debt_obligations * 5) + np.random.normal(0, 2, days)
-    df = pd.DataFrame({
-        'Fecha': dates, 'WTI_Price': wti_price,
-        'Deuda_Diaria': debt_obligations, 'Flujo_Caja_M_USD': cash_flow
-    })
+    df = pd.DataFrame({'Fecha': dates, 'WTI_Price': wti_price, 'Flujo_Caja_M_USD': cash_flow})
     df['Dia_Index'] = np.arange(len(df))
     return df
 
-def train_advanced_ai(df):
-    X = df[['Dia_Index', 'WTI_Price']]
-    y = df['Flujo_Caja_M_USD']
+def train_model(df):
     model = LinearRegression()
-    model.fit(X, y)
+    model.fit(df[['Dia_Index']], df['Flujo_Caja_M_USD'])
     return model
 
-# --- NUEVA FUNCIÓN: PROYECCIÓN DE IMPACTO (ROI) ---
-def plot_impact_projection():
-    # Simulamos 12 meses de proyección
-    months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-    
-    # Escenario 1: Costos Operativos Sin IA (Tendencia lineal de gasto)
-    # Supongamos gastos de monitoreo manual de 5M acumulados mes a mes
-    costs_manual = np.cumsum([5 + np.random.normal(0, 0.2) for _ in range(12)])
-    
-    # Escenario 2: Costos Con IA (Ahorro del 30% aprox en eficiencia)
-    costs_ai = np.cumsum([3.5 + np.random.normal(0, 0.1) for _ in range(12)])
-    
-    fig = go.Figure()
-    
-    # Línea Roja (Lo que gastan hoy)
-    fig.add_trace(go.Scatter(
-        x=months, y=costs_manual,
-        mode='lines+markers',
-        name='Gasto Operativo Actual (Manual)',
-        line=dict(color='red', dash='dot')
-    ))
-    
-    # Línea Verde (Lo que gastarían con tu IA)
-    fig.add_trace(go.Scatter(
-        x=months, y=costs_ai,
-        mode='lines+markers',
-        name='Gasto Proyectado con IA',
-        fill='tonexty', # Esto rellena el área entre las líneas
-        fillcolor='rgba(0, 255, 0, 0.1)', # Color verde suavecito
-        line=dict(color='green', width=3)
-    ))
-    
-    fig.update_layout(
-        title="📉 Proyección de Reducción de Costos Operativos (1 Año)",
-        yaxis_title="Gasto Acumulado (Millones USD)",
-        hovermode="x unified",
-        legend=dict(y=1.1, orientation='h')
-    )
-    
-    return fig, costs_manual[-1] - costs_ai[-1]
+# --- ESTADO DE LA SESIÓN (MEMORIA DEL CHAT) ---
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+    # Mensaje de bienvenida por defecto
+    st.session_state.messages.append({
+        "role": "assistant", 
+        "content": "Hola. Soy el asistente financiero de Petroperú. Tengo acceso a los datos de tesorería y mercado en tiempo real. ¿En qué puedo ayudarte hoy?"
+    })
+
+if "data" not in st.session_state:
+    st.session_state.data = get_financial_data()
 
 # --- INTERFAZ PRINCIPAL ---
-st.title("🛢️ Petroperú: Monitor de Liquidez & Impacto IA")
+st.title("🛢️ Petroperú: Asistente Financiero Inteligente")
 
-if st.button('🔄 Ejecutar Análisis Completo'):
-    # 1. Carga de Datos y Modelo
-    df = get_financial_data()
-    model = train_advanced_ai(df)
-    
-    # Predicciones
-    last_day_idx = df['Dia_Index'].iloc[-1]
-    last_wti = df['WTI_Price'].iloc[-1]
-    future_pred = model.predict([[last_day_idx + 1, last_wti]])[0]
-    
-    # 2. Métricas en tiempo real
-    st.subheader("1. Estado Financiero en Tiempo Real")
-    kpi1, kpi2, kpi3 = st.columns(3)
-    kpi1.metric("Precio WTI", f"${last_wti:.2f}")
-    kpi2.metric("Flujo de Caja Hoy", f"${df['Flujo_Caja_M_USD'].iloc[-1]:.2f}M")
-    
-    if future_pred < 45:
-        status = "RIESGO CRÍTICO"
-        col = "red"
-    else:
-        status = "ESTABLE"
-        col = "green"
-    kpi3.metric("Predicción IA (Mañana)", f"${future_pred:.2f}M", status)
+# Pestañas para separar Dashboard de Chat
+tab1, tab2 = st.tabs(["📊 Dashboard de Control", "💬 Consultas a la IA (Modo Gemini)"])
 
-    # 3. Gráfico de Correlación (El de antes)
-    fig_main = go.Figure()
-    fig_main.add_trace(go.Bar(x=df['Fecha'], y=df['Flujo_Caja_M_USD'], name='Caja (M USD)'))
-    fig_main.add_trace(go.Scatter(x=df['Fecha'], y=df['WTI_Price'], name='WTI ($)', yaxis='y2', line=dict(color='orange')))
-    fig_main.update_layout(yaxis2=dict(overlaying='y', side='right'), title="Correlación WTI vs Caja")
-    st.plotly_chart(fig_main, use_container_width=True)
+# --- TAB 1: EL DASHBOARD (Lo que ya tenías) ---
+with tab1:
+    st.markdown("### Monitoreo en Tiempo Real")
     
-    st.divider()
+    if st.button('🔄 Actualizar Datos de Mercado'):
+        st.session_state.data = get_financial_data()
+        st.success("Datos actualizados correctamente.")
     
-    # 4. SECCIÓN NUEVA: IMPACTO DEL PROYECTO
-    st.subheader("2. Estimación de Impacto del Proyecto (Business Case)")
-    st.markdown("""
-    > *Basado en benchmarks de transformación digital en sector Oil & Gas (Reducción de costos operativos ~30%).*
-    """)
+    df = st.session_state.data
+    model = train_model(df)
     
-    fig_impact, savings = plot_impact_projection()
+    # Gráfico rápido
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df['Fecha'], y=df['Flujo_Caja_M_USD'], fill='tozeroy', name='Flujo de Caja'))
+    st.plotly_chart(fig, use_container_width=True)
     
-    col_impact_1, col_impact_2 = st.columns([3, 1])
+    # KPIs rápidos
+    col1, col2 = st.columns(2)
+    col1.metric("Caja Actual", f"${df['Flujo_Caja_M_USD'].iloc[-1]:.2f}M")
+    col2.metric("Tendencia", "Estable" if model.coef_[0] > 0 else "Bajista", delta_color="off")
+
+# --- TAB 2: MODO GEMINI (EL CHATBOT) ---
+with tab2:
+    st.markdown("### 🤖 Chat con tus Finanzas")
     
-    with col_impact_1:
-        st.plotly_chart(fig_impact, use_container_width=True)
+    # 1. Mostrar historial de chat
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # 2. Input del usuario
+    if prompt := st.chat_input("Escribe tu consulta aquí (Ej: ¿Cómo está la deuda?)..."):
         
-    with col_impact_2:
-        st.success(f"💰 AHORRO ESTIMADO (ANUAL)")
-        st.metric("Eficiencia Financiera", f"${savings:.2f} M", "+30% ROI", delta_color="normal")
-        st.markdown("**Beneficios Clave:**")
-        st.markdown("- Automatización de reportes")
-        st.markdown("- Detección de fraude")
-        st.markdown("- Menos errores humanos")
+        # Mostrar mensaje del usuario
+        st.chat_message("user").markdown(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt})
 
-else:
-    st.info("Inicia el sistema para ver los dashboards.")
+        # 3. LÓGICA DE RESPUESTA (Simulación de IA)
+        # Aquí hacemos que parezca inteligente detectando palabras clave
+        prompt_lower = prompt.lower()
+        response = ""
+        
+        # Datos actuales para usar en la respuesta
+        current_cash = st.session_state.data['Flujo_Caja_M_USD'].iloc[-1]
+        
+        with st.spinner('Analizando base de datos...'):
+            time.sleep(1.5) # Simular que piensa
+            
+            if "hola" in prompt_lower or "buenos" in prompt_lower:
+                response = "¡Hola! Estoy listo para analizar los estados financieros. Puedes preguntarme por la **deuda**, el **flujo de caja** o **proyecciones**."
+                
+            elif "deuda" in prompt_lower or "talara" in prompt_lower:
+                response = f"Actualmente, la deuda estructural relacionada a la Nueva Refinería de Talara asciende a **$8,500 Millones**. Recomiendo vigilar el ratio de cobertura de intereses, ya que el flujo de caja actual de **${current_cash:.2f}M** podría estar presionado."
+                
+            elif "caja" in prompt_lower or "dinero" in prompt_lower or "liquidez" in prompt_lower:
+                response = f"Al cierre de hoy, la liquidez disponible es de **${current_cash:.2f} Millones**. "
+                if current_cash < 50:
+                    response += "⚠️ **Alerta:** Este nivel es bajo. Sugiero activar líneas de crédito rotativas de inmediato."
+                else:
+                    response += "✅ **Estado:** El nivel es saludable para operaciones de corto plazo."
+            
+            elif "petróleo" in prompt_lower or "wti" in prompt_lower or "precio" in prompt_lower:
+                response = "El precio del crudo muestra volatilidad. Recuerda que nuestra IA ha detectado que por cada dólar que baja el WTI, nuestro margen de refinación se reduce significativamente. ¿Deseas ver una simulación de impacto?"
+            
+            elif "riesgo" in prompt_lower or "peligro" in prompt_lower:
+                response = "He calculado el **VaR (Value at Risk)**. Existe un 15% de probabilidad de que necesitemos inyección de capital del MEF si el petróleo cae por debajo de $70 esta semana."
+                
+            else:
+                response = "Interesante pregunta. Basado en mis modelos de regresión lineal, sugiero mantener cautela en el gasto operativo (OPEX) hasta confirmar la tendencia de la próxima semana. ¿Quieres que genere un reporte detallado?"
+
+        # Mostrar respuesta del asistente
+        with st.chat_message("assistant"):
+            st.markdown(response)
+        
+        # Guardar respuesta en historial
+        st.session_state.messages.append({"role": "assistant", "content": response})
