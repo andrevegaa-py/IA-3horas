@@ -14,7 +14,7 @@ if 'pagina_actual' not in st.session_state:
 if 'moneda' not in st.session_state:
     st.session_state.moneda = "USD ($)"
 
-# --- ESTADO INTELIGENCIA ARTIFICIAL (MEMORIA DE PROFUNDIDAD) ---
+# --- ESTADO INTELIGENCIA ARTIFICIAL (MEMORIA) ---
 if "contexto_chat" not in st.session_state:
     # Rastrea: Tema actual y Nivel de profundidad (0=Ejecutivo, 1=Analítico, 2=Técnico)
     st.session_state.contexto_chat = {"tema_actual": None, "nivel_profundidad": 0}
@@ -23,12 +23,13 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant", 
         "content": (
-            "Bienvenido. Soy Petrolito, su sistema de inteligencia financiera.\n\n"
-            "He sido actualizado con una arquitectura de **Niveles de Profundidad** para evitar redundancias.\n"
-            "Puedo detallar progresivamente información sobre:\n"
-            "• **Deuda Estructural** (Bonos y CESCE)\n"
-            "• **Operaciones Talara** (Flexicoking y Márgenes)\n"
-            "• **Macroeconomía** (Riesgo País y WTI)\n\n"
+            "Bienvenido al Hub de Inteligencia. Soy Petrolito 3.0.\n\n"
+            "He sido actualizado con capacidades de **Análisis Histórico** y **Generación de Gráficos**.\n"
+            "Puedo asistirle en:\n"
+            "• **Historia** (Evolución y Producción)\n"
+            "• **Deuda** (Bonos y Estrategia)\n"
+            "• **Talara** (Operaciones y Flexicoking)\n"
+            "• **Macro** (Riesgo País y WTI)\n\n"
             "¿Por dónde desea comenzar?"
         )
     }]
@@ -78,7 +79,7 @@ estilos_tech = """
         background-color: #38BDF8; color: #0F172A !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
     }
 
-    /* 5. CHAT CARDS (NUEVO DISEÑO) */
+    /* 5. CHAT CARDS */
     .bot-card {
         background-color: rgba(15, 23, 42, 0.9); 
         border: 1px solid #38BDF8; 
@@ -115,125 +116,119 @@ IMG_CARD_TALARA = "https://portal.andina.pe/EDPfotografia3/Thumbnail/2022/04/12/
 IMG_CARD_FINANCE = "https://img.freepik.com/free-photo/standard-quality-control-collage-concept_23-2149595831.jpg"
 IMG_CARD_AI = "https://img.freepik.com/free-photo/rpa-concept-with-blurry-hand-touching-screen_23-2149311914.jpg"
 
-# --- 4. CEREBRO FINANCIERO AVANZADO (LÓGICA MULTINIVEL) ---
-def cerebro_financiero_avanzado(prompt):
-    prompt = prompt.lower()
-    
-    # BASE DE DATOS JERÁRQUICA (Lista de 3 niveles por tema)
-    db_multinivel = {
-        "deuda": [
-            # NIVEL 0: Ejecutivo
-            {
-                "titulo": "📉 Deuda: Panorama Ejecutivo",
-                "texto": "La deuda total consolidada es de **USD 8.5 Billones**. La estructura es pesada pero sostenible si se recupera el Grado de Inversión. Actualmente, el servicio de deuda compite con el OPEX.",
-                "dato": "Total: $8.5B | Apalancamiento: Crítico"
-            },
-            # NIVEL 1: Analítico
-            {
-                "titulo": "📉 Deuda: Desglose por Instrumento",
-                "texto": "Profundizando en la composición: El 45% son **Bonos Corporativos** internacionales y el 30% corresponde a la facilidad **CESCE (España)** para Talara. El resto es capital de trabajo a corto plazo que requiere 'rollover' constante.",
-                "dato": "Bonos: $3.0B | CESCE: $1.3B"
-            },
-            # NIVEL 2: Técnico/Granular
-            {
-                "titulo": "📉 Deuda: Detalle de Covenants y Tasas",
-                "texto": "A nivel granular: El **Bono 2047** tiene un cupón de 5.625%, pero su 'Yield' actual supera el 11% debido al descuento por riesgo país. Estamos negociando un 'Waiver' con la banca sindicada por incumplimiento de ratios de liquidez corriente.",
-                "dato": "Cupón 2047: 5.625% | Waiver: En trámite"
-            }
-        ],
-        "talara": [
-            # NIVEL 0
-            {
-                "titulo": "🏭 PMRT: Situación General",
-                "texto": "La Nueva Refinería Talara está operativa al 100%. Ya no es un proyecto en construcción. Procesa 95k barriles/día produciendo combustibles Euro VI.",
-                "dato": "Estado: 100% Operativa"
-            },
-            # NIVEL 1
-            {
-                "titulo": "🏭 PMRT: Margen de Refinación",
-                "texto": "La rentabilidad depende de la unidad de **Flexicoking**. A diferencia de la refinería antigua, esta tecnología convierte residuales baratos en productos valiosos, buscando elevar el margen de $4 a $10-12 por barril.",
-                "dato": "Margen Objetivo: $10-12/bbl"
-            },
-            # NIVEL 2
-            {
-                "titulo": "🏭 PMRT: Especificaciones Técnicas",
-                "texto": "Datos duros: La unidad de Flexicoking (FCK) tiene capacidad de 22,000 BPD de residuo de vacío. Las unidades de hidrotratamiento (HTD/HTG) operan a 85 bares de presión para eliminar azufre (<50ppm). El cuello de botella actual es logístico (evacuación en muelle).",
-                "dato": "Capacidad FCK: 22k BPD | Azufre: <50ppm"
-            }
-        ],
-        "macro": [
-            # NIVEL 0
-            {
-                "titulo": "🌍 Contexto: Estabilidad y Sector",
-                "texto": "El entorno es volátil. El precio del crudo y el soporte del Gobierno son las variables clave. A nivel nacional, mantenemos la garantía implícita del Estado Peruano.",
-                "dato": "Soporte: Activo (Decretos Urgencia)"
-            },
-            # NIVEL 1
-            {
-                "titulo": "🌍 Contexto: Variables de Mercado",
-                "texto": "El **WTI** oscila entre $75-$80, lo que afecta el costo de importación. El **Tipo de Cambio** (~3.75 PEN/USD) es crítico pues vendemos en Soles pero pagamos deuda en Dólares. El BCRP interviene para suavizar esta volatilidad.",
-                "dato": "TC: 3.75 | WTI: ~$78"
-            },
-            # NIVEL 2
-            {
-                "titulo": "🌍 Contexto: Riesgo y Calificación",
-                "texto": "Técnicamente, nuestra calificación crediticia ha bajado (Fitch/S&P nos ubican en terreno especulativo 'Junk'). El 'Spread' soberano de Perú es bajo (168 pbs), pero el spread corporativo de Petroperú es alto. La estrategia es recuperar el 'Investment Grade' vía auditorías.",
-                "dato": "Rating: BB+ (Negativo) | Riesgo País: 168pbs"
-            }
-        ]
-    }
+# --- 4. CEREBRO FINANCIERO 3.0 (CLASE COMPLETA) ---
 
-    # 1. DETECCIÓN DE TEMA
-    tema_detectado = None
-    if any(x in prompt for x in ["deuda", "bono", "banco", "pagar", "dinero"]): tema_detectado = "deuda"
-    elif any(x in prompt for x in ["talara", "refineria", "refinería", "produccion", "flexicoking"]): tema_detectado = "talara"
-    elif any(x in prompt for x in ["mercado", "sector", "wti", "precio", "gobierno", "mef", "riesgo", "nacional"]): tema_detectado = "macro"
-
-    # 2. MÁQUINA DE ESTADOS (Profundidad Automática)
-    if tema_detectado:
-        estado = st.session_state.contexto_chat
+class PetrolitoBrain:
+    def __init__(self):
+        self.USE_LIVE_API = False 
         
-        # Si el usuario sigue preguntando sobre lo mismo, profundizamos (Nivel 0 -> 1 -> 2)
-        if estado["tema_actual"] == tema_detectado:
-            nuevo_nivel = min(estado["nivel_profundidad"] + 1, 2)
+        # BASE DE CONOCIMIENTO AMPLIADA (Finanzas + Historia)
+        self.knowledge_base = {
+            "historia": [
+                {
+                    "nivel": 0,
+                    "titulo": "📜 Historia: Origen y Misión",
+                    "texto": "Petroperú fue creada el **24 de julio de 1969** (Ley 17753) tras la expropiación de los activos de la *International Petroleum Company* (IPC) en Talara. Su misión fundacional fue asegurar la soberanía energética del país, integrando verticalmente la exploración, refinación y distribución.",
+                    "dato": "Fundación: 1969 (Gob. Velasco) | Activo Base: Talara",
+                    "adjunto": "grafico_historia" # Trigger para gráfico
+                },
+                {
+                    "nivel": 1,
+                    "titulo": "📜 Historia: La Privatización (Años 90)",
+                    "texto": "En los 90, bajo una política de libre mercado, Petroperú fue fragmentada. Se privatizaron activos clave: La Flota Petrolera (Transoceánica), la Planta de Gas (Solgas), grifos propios y refinerías menores (La Pampilla). La empresa perdió su integración vertical y se quedó solo con refinación y transporte (Oleoducto).",
+                    "dato": "Pérdida: Grifos y Pozos | Enfoque: Solo Refino"
+                },
+                {
+                    "nivel": 2,
+                    "titulo": "📜 Historia: Retorno al Upstream y Ley 30130",
+                    "texto": "En 2013 se promulga la **Ley 30130**, que declara de necesidad pública la Modernización de Talara, pero prohíbe inversiones en otros rubros si generan deuda. Recientemente, Petroperú ha retornado al 'Upstream' (Explotación) operando temporalmente los Lotes I, VI y Z-69 en Talara, buscando recuperar la integración vertical.",
+                    "dato": "Ley 30130: Candado Financiero | Lotes actuales: I, VI, Z-69"
+                }
+            ],
+            "deuda": [
+                {"nivel": 0, "titulo": "📉 Deuda: Visión General", "texto": "La deuda financiera total es de **USD 8.5 Billones**. Dependemos de líneas garantizadas por el MEF. El flujo de caja operativo es insuficiente para el servicio de deuda corto plazo.", "dato": "Deuda: $8.5B", "adjunto": "tabla_deuda"},
+                {"nivel": 1, "titulo": "📉 Composición de Pasivos", "texto": "45% Bonos Corporativos y 30% Facilidad CESCE (España). Presión crítica en capital de trabajo (Revolving).", "dato": "Bonos: $3.0B"},
+                {"nivel": 2, "titulo": "📉 Covenants y Yield", "texto": "Yield de bonos 2047 supera el 11%. Se negocian 'Waivers' por incumplimiento de ratios de liquidez.", "dato": "Yield: >11%"}
+            ],
+            "talara": [
+                {"nivel": 0, "titulo": "🏭 NRT: Status Operativo", "texto": "Refinería al 100%. Procesa 95k barriles/día. Ya no es proyecto, es activo productivo Euro VI.", "dato": "Capacidad: 95 KBPD"},
+                {"nivel": 1, "titulo": "🏭 Márgenes y Flexicoking", "texto": "El margen objetivo es $10-12/bbl gracias a la unidad de Flexicoking que convierte residuales en destilados valiosos.", "dato": "Margen: $10-12"},
+                {"nivel": 2, "titulo": "🏭 Tecnología ExxonMobil", "texto": "La licencia de Flexicoking permite procesar crudos pesados generando gas de síntesis para autogeneración eléctrica.", "dato": "Licencia: Exxon"}
+            ],
+            "macro": [
+                {"nivel": 0, "titulo": "🌍 Riesgo y Entorno", "texto": "Entorno volátil. Variables clave: WTI y soporte del Estado. Calificación crediticia en terreno especulativo.", "dato": "Rating: Junk"},
+                {"nivel": 1, "titulo": "🌍 Mismatch de Monedas", "texto": "Ingresos en Soles vs Deuda en Dólares. Tipo de cambio >3.80 afecta gravemente la caja.", "dato": "Riesgo FX: Alto"},
+                {"nivel": 2, "titulo": "🌍 Gobernanza", "texto": "Exigencia de acreedores: Auditoría externa (PwC) y reestructuración con gestor privado (PMO).", "dato": "Auditor: PwC"}
+            ]
+        }
+
+    def _generar_grafico_produccion(self):
+        """Genera un gráfico histórico de producción para el chat"""
+        years = [1980, 1990, 2000, 2010, 2020, 2024]
+        prod = [180, 120, 40, 45, 35, 95] # Miles de barriles (aprox)
+        fig = go.Figure(data=go.Scatter(x=years, y=prod, mode='lines+markers', line=dict(color='#00C851', width=3)))
+        fig.update_layout(title="Producción Histórica (Miles BPD)", template="plotly_dark", height=250, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+        return fig
+
+    def _generar_tabla_deuda(self):
+        """Genera dataframe para descarga"""
+        return pd.DataFrame({
+            "Instrumento": ["Bonos 2032", "Bonos 2047", "CESCE", "Banca Local"],
+            "Monto_MM": [1000, 2000, 1300, 500],
+            "Tasa": ["4.75%", "5.625%", "Variable", "8.00%"]
+        })
+
+    def _detectar_intencion(self, prompt):
+        prompt = prompt.lower()
+        if any(x in prompt for x in ["historia", "velasco", "1969", "creacion", "pasado", "privatiza", "ipc"]): return "historia"
+        if any(x in prompt for x in ["deuda", "bono", "banco", "dinero", "mef"]): return "deuda"
+        if any(x in prompt for x in ["talara", "refineria", "nrt", "flexicoking"]): return "talara"
+        if any(x in prompt for x in ["macro", "dolar", "wti", "precio"]): return "macro"
+        return None
+
+    def procesar_consulta(self, prompt, estado_actual):
+        tema = self._detectar_intencion(prompt)
+        response_payload = {"texto": "", "adjunto_tipo": None, "adjunto_data": None}
+
+        # Lógica de Profundidad
+        nuevo_nivel = 0
+        if any(x in prompt for x in ["mas", "más", "detalle", "profundiza"]):
+            tema = estado_actual["tema_actual"]
+            if tema: nuevo_nivel = min(estado_actual["nivel_profundidad"] + 1, 2)
+        elif tema:
+            if estado_actual["tema_actual"] == tema:
+                nuevo_nivel = min(estado_actual["nivel_profundidad"] + 1, 2)
         else:
-            # Si cambia de tema, reseteamos al nivel ejecutivo (0)
-            nuevo_nivel = 0
-        
-        # Actualizamos memoria
-        st.session_state.contexto_chat = {"tema_actual": tema_detectado, "nivel_profundidad": nuevo_nivel}
-        
-        # Extraemos la info
-        info = db_multinivel[tema_detectado][nuevo_nivel]
-        
-        # Mensaje guía
-        footer = ""
-        if nuevo_nivel < 2:
-            footer = "\n\n🔽 *Para más detalles técnicos sobre esto, vuelva a preguntar o diga 'profundizar'.*"
-        else:
-            footer = "\n\n✅ *Ha llegado al nivel máximo de detalle técnico disponible en mi base.*"
+            response_payload["texto"] = "No entiendo el contexto. Pruebe: 'Historia de la empresa', 'Situación de Deuda' o 'Refinería Talara'."
+            return response_payload
 
-        return f"### {info['titulo']}\n\n{info['texto']}\n\n**Dato Clave:** {info['dato']}{footer}"
+        # Actualizar Estado
+        st.session_state.contexto_chat["tema_actual"] = tema
+        st.session_state.contexto_chat["nivel_profundidad"] = nuevo_nivel
 
-    # 3. COMANDO DE CONTINUIDAD (Sin tema explícito)
-    if any(x in prompt for x in ["mas", "más", "detalle", "sigue", "profundiza"]):
-        tema = st.session_state.contexto_chat["tema_actual"]
-        if tema:
-            nivel = min(st.session_state.contexto_chat["nivel_profundidad"] + 1, 2)
-            st.session_state.contexto_chat["nivel_profundidad"] = nivel
-            info = db_multinivel[tema][nivel]
-            return f"### {info['titulo']} (Detalle)\n\n{info['texto']}\n\n**Dato Clave:** {info['dato']}"
+        # Construir Respuesta
+        try:
+            data = self.knowledge_base[tema][nuevo_nivel]
+            response_payload["texto"] = f"### {data['titulo']}\n\n{data['texto']}\n\n**Dato Clave:** {data['dato']}"
+            
+            # GESTIÓN DE ADJUNTOS (INTELIGENCIA MULTIMEDIA)
+            if "adjunto" in data:
+                if data["adjunto"] == "grafico_historia":
+                    response_payload["adjunto_tipo"] = "grafico"
+                    response_payload["adjunto_data"] = self._generar_grafico_produccion()
+                elif data["adjunto"] == "tabla_deuda":
+                    response_payload["adjunto_tipo"] = "dataframe"
+                    response_payload["adjunto_data"] = self._generar_tabla_deuda()
+                    
+        except:
+            response_payload["texto"] = "Información no disponible para este nivel."
 
-    # 4. FALLBACK INTELIGENTE
-    return (
-        "Entendido. Para utilizar mi capacidad de análisis multinivel, necesito que seleccione un vector:\n"
-        "1. **Finanzas:** Deuda y Bonos.\n"
-        "2. **Técnico:** Talara y Producción.\n"
-        "3. **Entorno:** Riesgo País y WTI.\n\n"
-        "Pruebe preguntando: *'Hablemos del Riesgo País'*."
-    )
+        return response_payload
 
-# --- 5. FUNCIONES DE DATOS COMPLETA ---
+# Instanciar cerebro
+brain = PetrolitoBrain()
+
+# --- 5. FUNCIONES AUXILIARES VISUALES ---
 def get_talara_waterfall():
     return pd.DataFrame({
         'Concepto': ['Presupuesto Inicial', 'Actualización', 'Contrato EPC', 'Auxiliares', 'Intereses', 'Costo Final'],
@@ -313,13 +308,13 @@ with st.sidebar:
     csv = get_csv_download()
     st.download_button("📥 Descargar Reporte", data=csv, file_name='reporte_petroperu.csv', mime='text/csv')
     
-    st.write("") # Espacio
+    st.write("") 
     st.markdown("### 🌍 Sostenibilidad")
     st.image(IMG_SIDEBAR_BANNER, caption="Talara - Feed en Vivo", use_column_width=True)
     st.caption("Monitoreo ambiental activo: ✅ Normal")
 
 # ==================================================
-# VISTA 1: HOME (TARJETAS VISUALES)
+# VISTA 1: HOME
 # ==================================================
 if st.session_state.pagina_actual == 'home':
     st.title("🚀 Petroperú AI Hub: Plataforma Estratégica")
@@ -343,11 +338,11 @@ if st.session_state.pagina_actual == 'home':
     with c3:
         st.image(IMG_CARD_AI, use_column_width=True)
         st.markdown("### 🤖 Petrolito AI")
-        st.info("Tu analista virtual con Deep Learning.")
+        st.info("Analista virtual: Historia & Finanzas.")
         if st.button("Consultar ➔", key="b3"): navegar_a('chat')
 
 # ==================================================
-# VISTA 2: TALARA (DETALLE COMPLETO)
+# VISTA 2: TALARA
 # ==================================================
 elif st.session_state.pagina_actual == 'talara':
     st.title("🏭 Auditoría Visual: Nueva Refinería Talara")
@@ -412,7 +407,7 @@ elif st.session_state.pagina_actual == 'talara':
         st.plotly_chart(fig_g, use_container_width=True)
 
 # ==================================================
-# VISTA 3: DASHBOARD (DETALLE COMPLETO)
+# VISTA 3: DASHBOARD
 # ==================================================
 elif st.session_state.pagina_actual == 'dashboard':
     moneda_sim = "$" if st.session_state.moneda == "USD ($)" else "S/."
@@ -478,20 +473,21 @@ elif st.session_state.pagina_actual == 'dashboard':
         st.dataframe(df_bancos, use_container_width=True, hide_index=True)
 
 # ==================================================
-# VISTA 4: CHAT (CON CEREBRO 4.0 & UI PRO)
+# VISTA 4: CHAT (CON SOPORTE MULTIMEDIA)
 # ==================================================
 elif st.session_state.pagina_actual == 'chat':
-    st.title("🤖 Petrolito AI: Drill-Down Analysis")
-    st.markdown("*Capacidad: Análisis Progresivo (Ejecutivo > Analítico > Técnico)*")
+    st.title("🤖 Petrolito AI: Análisis & Historia")
+    st.markdown("*Capacidad: Finanzas, Operaciones, Macro y Datos Históricos.*")
     
     if st.button("⬅ Volver"): navegar_a('home')
 
     chat_container = st.container()
 
-    # Historial Renderizado
+    # --- RENDERIZADO DE HISTORIAL ---
     with chat_container:
         for msg in st.session_state.messages:
             if msg["role"] == "assistant":
+                # Renderizar Tarjeta del Bot
                 st.markdown(f"""
                 <div class="bot-card">
                     <div style="display: flex; align-items: center; margin-bottom: 8px;">
@@ -503,49 +499,64 @@ elif st.session_state.pagina_actual == 'chat':
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+                
+                # Renderizar Adjuntos si existen en el historial
+                if "adjunto_tipo" in msg:
+                    if msg["adjunto_tipo"] == "grafico":
+                        st.plotly_chart(msg["adjunto_data"], use_container_width=True)
+                    elif msg["adjunto_tipo"] == "dataframe":
+                        st.dataframe(msg["adjunto_data"], hide_index=True)
+
             else:
+                # Renderizar Usuario
                 st.markdown(f"""<div style="text-align: right;"><div class="user-card">{msg["content"]}</div></div>""", unsafe_allow_html=True)
 
-    # Input Usuario
-    if prompt := st.chat_input("Consulte sobre Deuda, Talara o Macroeconomía..."):
-        # Guardar Msg Usuario
+    # --- INPUT DE USUARIO ---
+    if prompt := st.chat_input("Ej: 'Cuéntame la historia de Petroperú' o 'Detalle de la deuda'"):
+        # 1. Guardar mensaje usuario
         st.session_state.messages.append({"role": "user", "content": prompt})
-        
-        # Hack Visual: Mostrar inmediatamente el mensaje del usuario
         with chat_container:
             st.markdown(f"""<div style="text-align: right;"><div class="user-card">{prompt}</div></div>""", unsafe_allow_html=True)
 
-        # Procesamiento IA
+        # 2. Procesamiento IA
         with chat_container:
             placeholder = st.empty()
+            placeholder.markdown(f"<div style='color:#38BDF8; font-style:italic;'>🤖 Consultando base de datos...</div>", unsafe_allow_html=True)
+            time.sleep(0.5)
             
-            # Indicador Visual de Profundidad (Status Bar)
-            tema_actual = st.session_state.contexto_chat.get('tema_actual', 'General') or 'General'
-            # Calculamos el nivel futuro solo para mostrarlo (la lógica real está en la función)
-            nivel_futuro = min(st.session_state.contexto_chat.get('nivel_profundidad', 0) + 1, 2)
+            # Obtener respuesta compleja (Texto + Adjuntos)
+            respuesta_obj = brain.procesar_consulta(prompt, st.session_state.contexto_chat)
             
-            placeholder.markdown(f"""
-            <div class='bot-card' style='text-align:center; color:#38BDF8; border: 1px dashed #38BDF8; opacity: 0.7;'>
-                <i>🔍 Analizando vector: {tema_actual.upper()} | Profundidad: Nivel {nivel_futuro + 1}/3...</i>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            time.sleep(1.0) # Simulación de cómputo
-            
-            # Llamada al Cerebro Financiero Avanzado
-            respuesta_ia = cerebro_financiero_avanzado(prompt)
-            
-            # Renderizar Respuesta Final
-            placeholder.markdown(f"""
+            # Limpiar placeholder
+            placeholder.empty()
+
+            # 3. Mostrar Respuesta Texto
+            st.markdown(f"""
             <div class="bot-card">
                 <div style="display: flex; align-items: center; margin-bottom: 8px;">
                     <span style="font-size: 20px; margin-right: 10px;">🤖</span>
                     <b style="color: #38BDF8;">PETROLITO AI</b>
                 </div>
                 <div style="color: #E2E8F0; font-family: 'Segoe UI'; font-size: 15px; line-height: 1.6;">
-                    {respuesta_ia}
+                    {respuesta_obj['texto']}
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-        st.session_state.messages.append({"role": "assistant", "content": respuesta_ia})
+            # 4. Mostrar Adjuntos Multimedia (Si existen)
+            if respuesta_obj["adjunto_tipo"] == "grafico":
+                st.caption("📊 Visualización Generada:")
+                st.plotly_chart(respuesta_obj["adjunto_data"], use_container_width=True)
+                
+            elif respuesta_obj["adjunto_tipo"] == "dataframe":
+                st.caption("📋 Datos Estructurados:")
+                st.dataframe(respuesta_obj["adjunto_data"], use_container_width=True)
+
+            # 5. Guardar en Historial (Incluyendo data de adjuntos)
+            msg_data = {
+                "role": "assistant", 
+                "content": respuesta_obj["texto"],
+                "adjunto_tipo": respuesta_obj["adjunto_tipo"],
+                "adjunto_data": respuesta_obj["adjunto_data"]
+            }
+            st.session_state.messages.append(msg_data)
