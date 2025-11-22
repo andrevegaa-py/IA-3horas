@@ -8,30 +8,30 @@ import time
 # --- 1. CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Petroperú AI Hub", layout="wide", page_icon="🏭")
 
-# --- 2. GESTIÓN DE ESTADO (SESSION STATE & MEMORIA) ---
+# --- 2. GESTIÓN DE NAVEGACIÓN Y ESTADO ---
 if 'pagina_actual' not in st.session_state:
     st.session_state.pagina_actual = 'home'
 if 'moneda' not in st.session_state:
     st.session_state.moneda = "USD ($)"
 
-# Memoria de Chat y Contexto de Profundidad
+# --- ESTADO INTELIGENCIA ARTIFICIAL (MEMORIA DE PROFUNDIDAD) ---
+if "contexto_chat" not in st.session_state:
+    # Rastrea: Tema actual y Nivel de profundidad (0=Ejecutivo, 1=Analítico, 2=Técnico)
+    st.session_state.contexto_chat = {"tema_actual": None, "nivel_profundidad": 0}
+
 if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant", 
         "content": (
             "Bienvenido. Soy Petrolito, su sistema de inteligencia financiera.\n\n"
-            "Mi nueva arquitectura de **Niveles de Profundidad** me permite detallar información progresivamente.\n"
-            "Temas habilitados para Drill-Down:\n"
+            "He sido actualizado con una arquitectura de **Niveles de Profundidad** para evitar redundancias.\n"
+            "Puedo detallar progresivamente información sobre:\n"
             "• **Deuda Estructural** (Bonos y CESCE)\n"
             "• **Operaciones Talara** (Flexicoking y Márgenes)\n"
             "• **Macroeconomía** (Riesgo País y WTI)\n\n"
             "¿Por dónde desea comenzar?"
         )
     }]
-
-if "contexto_chat" not in st.session_state:
-    # Rastrea de qué estamos hablando y en qué nivel de detalle (0=Resumen, 1=Detalle, 2=Técnico)
-    st.session_state.contexto_chat = {"tema_actual": None, "nivel_profundidad": 0}
 
 def navegar_a(pagina):
     st.session_state.pagina_actual = pagina
@@ -40,30 +40,45 @@ def navegar_a(pagina):
 # --- 3. ESTILOS CSS (VISUAL IMPACT) ---
 estilos_tech = """
 <style>
-    /* FONDO GENERAL */
+    /* 1. FONDO GENERAL */
     [data-testid="stAppViewContainer"] {
         background-image: linear-gradient(rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.96)), 
                           url("https://img.freepik.com/free-vector/abstract-technology-background-with-connecting-dots-lines_1048-12334.jpg");
         background-size: cover; background-position: center; background-attachment: fixed;
     }
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
-    [data-testid="stSidebar"] { background-color: #0B1120; border-right: 1px solid rgba(56, 189, 248, 0.2); }
+
+    /* 2. SIDEBAR */
+    [data-testid="stSidebar"] {
+        background-color: #0B1120;
+        border-right: 1px solid rgba(56, 189, 248, 0.2);
+    }
     
-    /* TEXTOS */
+    /* 3. TIPOGRAFÍA */
     h1, h2, h3, h4, h5, h6, p, li, div, span, label, b, i, strong, small { 
         color: #FFFFFF !important; font-family: 'Segoe UI', sans-serif; 
     }
     
-    /* COMPONENTS */
+    /* 4. ELEMENTOS UI */
+    .stSelectbox div[data-baseweb="select"] > div {
+        background-color: #1E293B !important; color: white !important; border: 1px solid #38BDF8;
+    }
+    .glass-card {
+        background-color: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px; padding: 20px;
+        backdrop-filter: blur(8px); margin-bottom: 15px;
+    }
     .stButton>button {
         width: 100%; background-color: #1E293B; color: #38BDF8 !important; 
-        border: 1px solid #38BDF8; border-radius: 6px; transition: 0.3s;
+        border: 1px solid #38BDF8; border-radius: 6px; padding: 10px; 
+        font-weight: 600; text-transform: uppercase; transition: 0.3s;
     }
     .stButton>button:hover {
-        box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        background-color: #38BDF8; color: #0F172A !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
     }
-    
-    /* CHAT CARDS */
+
+    /* 5. CHAT CARDS (NUEVO DISEÑO) */
     .bot-card {
         background-color: rgba(15, 23, 42, 0.9); 
         border: 1px solid #38BDF8; 
@@ -83,12 +98,11 @@ estilos_tech = """
         display: inline-block;
         border: 1px solid rgba(255,255,255,0.1);
     }
-    .glass-card {
-        background-color: rgba(30, 41, 59, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px; padding: 20px;
-        backdrop-filter: blur(8px); margin-bottom: 15px;
-    }
+
+    /* 6. AJUSTES MÉTRICAS */
+    img { border-radius: 8px; }
+    [data-testid="stMetricValue"] { color: #38BDF8 !important; text-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
+    [data-testid="stMetricLabel"] { color: #FFFFFF !important; opacity: 0.9; }
 </style>
 """
 st.markdown(estilos_tech, unsafe_allow_html=True)
@@ -101,7 +115,7 @@ IMG_CARD_TALARA = "https://portal.andina.pe/EDPfotografia3/Thumbnail/2022/04/12/
 IMG_CARD_FINANCE = "https://img.freepik.com/free-photo/standard-quality-control-collage-concept_23-2149595831.jpg"
 IMG_CARD_AI = "https://img.freepik.com/free-photo/rpa-concept-with-blurry-hand-touching-screen_23-2149311914.jpg"
 
-# --- 4. CEREBRO FINANCIERO AVANZADO (MULTINIVEL) ---
+# --- 4. CEREBRO FINANCIERO AVANZADO (LÓGICA MULTINIVEL) ---
 def cerebro_financiero_avanzado(prompt):
     prompt = prompt.lower()
     
@@ -169,38 +183,39 @@ def cerebro_financiero_avanzado(prompt):
         ]
     }
 
-    # 1. DETECTAR TEMA
+    # 1. DETECCIÓN DE TEMA
     tema_detectado = None
     if any(x in prompt for x in ["deuda", "bono", "banco", "pagar", "dinero"]): tema_detectado = "deuda"
     elif any(x in prompt for x in ["talara", "refineria", "refinería", "produccion", "flexicoking"]): tema_detectado = "talara"
     elif any(x in prompt for x in ["mercado", "sector", "wti", "precio", "gobierno", "mef", "riesgo", "nacional"]): tema_detectado = "macro"
 
-    # 2. MÁQUINA DE ESTADOS (Profundidad)
+    # 2. MÁQUINA DE ESTADOS (Profundidad Automática)
     if tema_detectado:
         estado = st.session_state.contexto_chat
         
-        # Si es el mismo tema, aumentamos nivel. Si es nuevo, reset a 0.
+        # Si el usuario sigue preguntando sobre lo mismo, profundizamos (Nivel 0 -> 1 -> 2)
         if estado["tema_actual"] == tema_detectado:
             nuevo_nivel = min(estado["nivel_profundidad"] + 1, 2)
         else:
+            # Si cambia de tema, reseteamos al nivel ejecutivo (0)
             nuevo_nivel = 0
         
-        # Actualizar memoria
+        # Actualizamos memoria
         st.session_state.contexto_chat = {"tema_actual": tema_detectado, "nivel_profundidad": nuevo_nivel}
         
-        # Obtener info
+        # Extraemos la info
         info = db_multinivel[tema_detectado][nuevo_nivel]
         
-        # Mensaje de ayuda visual
+        # Mensaje guía
         footer = ""
         if nuevo_nivel < 2:
             footer = "\n\n🔽 *Para más detalles técnicos sobre esto, vuelva a preguntar o diga 'profundizar'.*"
         else:
-            footer = "\n\n✅ *Ha llegado al nivel máximo de detalle técnico disponible.*"
+            footer = "\n\n✅ *Ha llegado al nivel máximo de detalle técnico disponible en mi base.*"
 
         return f"### {info['titulo']}\n\n{info['texto']}\n\n**Dato Clave:** {info['dato']}{footer}"
 
-    # 3. CONTINUIDAD GENÉRICA (Si el usuario dice "sigue" sin mencionar tema)
+    # 3. COMANDO DE CONTINUIDAD (Sin tema explícito)
     if any(x in prompt for x in ["mas", "más", "detalle", "sigue", "profundiza"]):
         tema = st.session_state.contexto_chat["tema_actual"]
         if tema:
@@ -209,119 +224,261 @@ def cerebro_financiero_avanzado(prompt):
             info = db_multinivel[tema][nivel]
             return f"### {info['titulo']} (Detalle)\n\n{info['texto']}\n\n**Dato Clave:** {info['dato']}"
 
-    # 4. FALLBACK
+    # 4. FALLBACK INTELIGENTE
     return (
-        "Entendido. Para profundizar necesito saber qué vector analizar:\n"
+        "Entendido. Para utilizar mi capacidad de análisis multinivel, necesito que seleccione un vector:\n"
         "1. **Finanzas:** Deuda y Bonos.\n"
         "2. **Técnico:** Talara y Producción.\n"
         "3. **Entorno:** Riesgo País y WTI.\n\n"
         "Pruebe preguntando: *'Hablemos del Riesgo País'*."
     )
 
-# --- 5. FUNCIONES DE DATOS ---
+# --- 5. FUNCIONES DE DATOS COMPLETA ---
 def get_talara_waterfall():
-    return pd.DataFrame({'Concepto': ['Inicial', 'Cambios', 'EPC', 'Aux', 'Intereses', 'Final'], 'Monto': [1300, 2000, 1000, 800, 3400, 0], 'Medida': ["relative", "relative", "relative", "relative", "relative", "total"]})
+    return pd.DataFrame({
+        'Concepto': ['Presupuesto Inicial', 'Actualización', 'Contrato EPC', 'Auxiliares', 'Intereses', 'Costo Final'],
+        'Monto': [1300, 2000, 1000, 800, 3400, 0],
+        'Medida': ["relative", "relative", "relative", "relative", "relative", "total"]
+    })
+
 def get_talara_funding():
-    return pd.DataFrame({'Fuente': ['Bonos Corp.', 'Préstamos', 'Estado', 'Propios'], 'Monto_B': [4.3, 1.3, 1.5, 1.4]})
+    return pd.DataFrame({
+        'Fuente': ['Bonos Corp.', 'Préstamos', 'Estado', 'Propios'],
+        'Monto_B': [4.3, 1.3, 1.5, 1.4]
+    })
+
 def get_dashboard_data():
-    return pd.DataFrame({'Mes': ['Ene', 'Feb', 'Mar', 'Abr', 'May'], '2024': [120, 135, 110, 140, 155], '2023': [110, 125, 115, 130, 140], 'Gastos': [115, 130, 125, 135, 145], 'EBITDA': [5, 5, -15, 5, 10]})
+    meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun']
+    ingresos_2024 = [120, 135, 110, 140, 155, 160]
+    ingresos_2023 = [110, 125, 115, 130, 140, 145] 
+    gastos = [115, 130, 125, 135, 145, 150] 
+    ebitda = [x - y for x, y in zip(ingresos_2024, gastos)]
+    return pd.DataFrame({'Mes': meses, '2024': ingresos_2024, '2023': ingresos_2023, 'Gastos': gastos, 'EBITDA': ebitda})
+
 def get_rankings():
-    return pd.DataFrame({'Unidad': ['Refinería', 'Oleoducto', 'Ventas', 'Admin'], 'Gasto_M': [850, 320, 150, 120], 'Cambio_Anual': ['+12%', '+5%', '-2%', '+1%']})
+    costos = pd.DataFrame({
+        'Unidad': ['Refinería Talara', 'Oleoducto Norperuano', 'Planta Ventas Lima', 'Administración Central', 'Logística Selva'],
+        'Gasto_M': [850, 320, 150, 120, 80],
+        'Cambio_Anual': ['+12%', '+5%', '-2%', '+1%', '+4%']
+    })
+    return costos
+
 def get_csv_download():
-    return get_dashboard_data().to_csv(index=False).encode('utf-8')
+    df = get_dashboard_data()
+    return df.to_csv(index=False).encode('utf-8')
+
 def layout_blanco(fig, titulo):
-    fig.update_layout(title=dict(text=titulo, font=dict(color='white')), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), font_color="white")
+    fig.update_layout(
+        title=dict(text=titulo, font=dict(color='white', size=18)),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
+        xaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='white', title_font=dict(color='white')),
+        yaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='white', title_font=dict(color='white')),
+        legend=dict(font=dict(color='white')),
+        uniformtext_minsize=10, uniformtext_mode='hide'
+    )
     return fig
 
 # ==================================================
-# SIDEBAR
+# BARRA LATERAL (COMPLETA)
 # ==================================================
 with st.sidebar:
-    st.markdown(f"<div style='background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 0 15px rgba(56,189,248,0.3);'><img src='{IMG_LOGO}' width='100%'></div>", unsafe_allow_html=True)
-    st.markdown("### 👤 Admin Finanzas")
-    st.caption("Perfil: Gerencia General")
+    st.markdown(f"<div style='background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); margin-bottom: 20px;'><img src='{IMG_LOGO}' width='100%'></div>", unsafe_allow_html=True)
+
+    st.markdown("### 👤 Usuario Conectado")
+    c_prof1, c_prof2 = st.columns([1, 3])
+    with c_prof1:
+        st.markdown(f"<img src='{IMG_USER}' style='width: 60px; height: 60px; border-radius: 50%; border: 2px solid #38BDF8;'>", unsafe_allow_html=True)
+    with c_prof2:
+        st.markdown("""
+        <div style='padding-left: 5px;'>
+            <div style='color: white; font-weight: bold; font-size: 16px;'>Admin Finanzas</div>
+            <div style='color: #00C851; font-size: 12px; font-weight: bold;'>● En Línea</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.divider()
+
+    # Menú de Navegación Sidebar
     if st.button("🏠 HOME"): navegar_a('home')
-    if st.button("📊 DASHBOARD"): navegar_a('dashboard')
+    if st.button("🏭 TALARA"): navegar_a('talara')
+    if st.button("⚡ DASHBOARD"): navegar_a('dashboard')
     if st.button("🤖 CHAT AI"): navegar_a('chat')
+
+    st.markdown("### 🛠️ Ajustes")
+    moneda = st.selectbox("Moneda", ["USD ($)", "PEN (S/.)"])
+    st.session_state.moneda = moneda
+    unidad = st.selectbox("Escala", ["Millones (MM)", "Miles (k)"])
+
+    csv = get_csv_download()
+    st.download_button("📥 Descargar Reporte", data=csv, file_name='reporte_petroperu.csv', mime='text/csv')
     
-    st.markdown("### ⚙️ Ajustes")
-    st.session_state.moneda = st.selectbox("Moneda", ["USD ($)", "PEN (S/.)"])
-    st.download_button("📥 Data Financiera", data=get_csv_download(), file_name='reporte_petroperu.csv')
-    
-    st.write("")
-    st.image(IMG_SIDEBAR_BANNER, caption="Talara Live Feed", use_column_width=True)
+    st.write("") # Espacio
+    st.markdown("### 🌍 Sostenibilidad")
+    st.image(IMG_SIDEBAR_BANNER, caption="Talara - Feed en Vivo", use_column_width=True)
+    st.caption("Monitoreo ambiental activo: ✅ Normal")
 
 # ==================================================
-# VISTAS PRINCIPALES
+# VISTA 1: HOME (TARJETAS VISUALES)
 # ==================================================
 if st.session_state.pagina_actual == 'home':
-    st.title("🚀 Petroperú AI Hub")
-    st.markdown("#### Panel de Control Estratégico")
+    st.title("🚀 Petroperú AI Hub: Plataforma Estratégica")
+    st.markdown("#### Seleccione un módulo de inteligencia:")
+    st.write("") 
+
     c1, c2, c3 = st.columns(3)
+    
     with c1:
         st.image(IMG_CARD_TALARA, use_column_width=True)
-        st.markdown("### 🏭 Talara")
-        if st.button("Ver Auditoría ➔", key="b1"): navegar_a('talara')
+        st.markdown("### 🏭 Historia de Talara")
+        st.info("Auditoría de deuda y construcción.")
+        if st.button("Acceder ➔", key="b1"): navegar_a('talara')
+
     with c2:
         st.image(IMG_CARD_FINANCE, use_column_width=True)
-        st.markdown("### ⚡ Finanzas")
-        if st.button("Ver Dashboard ➔", key="b2"): navegar_a('dashboard')
+        st.markdown("### ⚡ Monitor Financiero")
+        st.info("KPIs de liquidez y EBITDA en vivo.")
+        if st.button("Acceder ➔", key="b2"): navegar_a('dashboard')
+
     with c3:
         st.image(IMG_CARD_AI, use_column_width=True)
-        st.markdown("### 🤖 Asesor AI")
+        st.markdown("### 🤖 Petrolito AI")
+        st.info("Tu analista virtual con Deep Learning.")
         if st.button("Consultar ➔", key="b3"): navegar_a('chat')
 
+# ==================================================
+# VISTA 2: TALARA (DETALLE COMPLETO)
+# ==================================================
 elif st.session_state.pagina_actual == 'talara':
-    st.title("🏭 Auditoría Visual: Talara")
-    if st.button("⬅ Volver"): navegar_a('home')
+    st.title("🏭 Auditoría Visual: Nueva Refinería Talara")
+    col_head, _ = st.columns([1, 5])
+    with col_head:
+        if st.button("⬅ Volver"): navegar_a('home')
     
+    # Métricas Superiores
+    st.markdown("#### 1. El Salto Cuántico del Presupuesto")
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Retraso", "5 Años", "Crítico")
-    m2.metric("Presupuesto", "$1.3 B", "2008")
-    m3.metric("Costo Final", "$8.5 B", "+553%", delta_color="inverse")
-    m4.metric("Operatividad", "100%", "Normal")
-    st.markdown("---")
-    
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        df_w = get_talara_waterfall()
-        fig = go.Figure(go.Waterfall(
-            orientation="v", measure=df_w['Medida'], x=df_w['Concepto'], y=df_w['Monto'],
-            text=["+1.3", "+2.0", "+1.0", "+0.8", "+3.4", "8.5"], textposition="outside",
-            connector={"line":{"color":"white"}}, decreasing={"marker":{"color":"green"}}, increasing={"marker":{"color":"#ff4444"}}, totals={"marker":{"color":"#33b5e5"}}
-        ))
-        st.plotly_chart(layout_blanco(fig, "Análisis de Sobrecosto (Billones $)"), use_container_width=True)
-    with c2:
-        st.markdown("#### Hitos")
-        st.markdown("<div class='glass-card'>• 2014: Inicio EPC<br>• 2017: Emisión Bonos<br>• 2020: COVID<br>• 2024: Full Operation</div>", unsafe_allow_html=True)
+    m1.metric("📅 Inicio", "2014", "5 años retraso")
+    m2.metric("💰 Presupuesto", "$1.3 B", "2008")
+    m3.metric("💸 Costo Final", "$8.5 B", "+553%", delta_color="inverse")
+    m4.metric("📉 TIR", "2.8%", "Crítico")
 
-elif st.session_state.pagina_actual == 'dashboard':
-    mon = "$" if st.session_state.moneda == "USD ($)" else "S/."
-    st.title(f"⚡ Monitor Financiero ({st.session_state.moneda})")
-    if st.button("⬅ Volver"): navegar_a('home')
-    
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Caja Disponible", f"{mon} 15.4 M", "-12%")
-    k2.metric("WTI Crudo", "$76.50", "+4.5%")
-    k3.metric("Deuda Total", f"{mon} 8.5 B", "+3.6%", delta_color="inverse")
-    k4.metric("EBITDA", f"{mon} 120 M", "+8.2%")
-    
     st.markdown("---")
-    c1, c2 = st.columns([2,1])
-    with c1:
-        df = get_dashboard_data()
-        fig = go.Figure()
-        fig.add_trace(go.Bar(x=df['Mes'], y=df['2024'], name='Ingresos', marker_color='#00C851'))
-        fig.add_trace(go.Scatter(x=df['Mes'], y=df['Gastos'], name='Gastos', line=dict(color='#ff4444')))
-        st.plotly_chart(layout_blanco(fig, "Flujo de Caja Operativo"), use_container_width=True)
-    with c2:
-        df_r = get_rankings()
-        fig = px.bar(df_r, y='Unidad', x='Gasto_M', orientation='h', color='Gasto_M', color_continuous_scale='Reds')
-        st.plotly_chart(layout_blanco(fig, "Centros de Costo"), use_container_width=True)
+    c_water, c_info = st.columns([2, 1])
+    
+    with c_water:
+        st.markdown("**🔍 Anatomía del Sobrecosto**")
+        df_w = get_talara_waterfall()
+        fig_w = go.Figure(go.Waterfall(
+            name = "Costo", orientation = "v", measure = df_w['Medida'], x = df_w['Concepto'], y = df_w['Monto'],
+            text = ["+1.3", "+2.0", "+1.0", "+0.8", "+3.4", "8.5"], textposition = "outside",
+            connector = {"line":{"color":"white"}}, decreasing = {"marker":{"color":"green"}},
+            increasing = {"marker":{"color":"#ff4444"}}, totals = {"marker":{"color":"#33b5e5"}}
+        ))
+        fig_w = layout_blanco(fig_w, "")
+        fig_w.update_traces(textfont_color='white')
+        st.plotly_chart(fig_w, use_container_width=True)
+
+    with c_info:
+        st.markdown("#### 📖 Hitos Clave")
+        st.markdown("""
+        <div class="glass-card">
+        <b>2014:</b> Firma EPC Técnicas Reunidas.<br><br>
+        <b>2017:</b> Bonos $2,000M emitidos.<br><br>
+        <b>2020:</b> Paralización COVID-19.<br><br>
+        <b>2022:</b> Crisis de liquidez.<br><br>
+        <b>2024:</b> Operación plena.
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    c_pie, c_time = st.columns(2)
+    with c_pie:
+        st.markdown("**🏦 Estructura de Financiamiento**")
+        df_f = get_talara_funding()
+        fig_p = px.pie(df_f, values='Monto_B', names='Fuente', color_discrete_sequence=px.colors.sequential.RdBu)
+        fig_p = layout_blanco(fig_p, "")
+        fig_p.update_traces(textfont_color='white', textinfo='percent+label')
+        st.plotly_chart(fig_p, use_container_width=True)
+
+    with c_time:
+        st.markdown("**⏳ Cronograma Real**")
+        df_gantt = pd.DataFrame([
+            dict(Task="Plan Original", Start='2014-01-01', Finish='2019-12-31', Color='Plan'),
+            dict(Task="Ejecución Real", Start='2014-01-01', Finish='2023-12-31', Color='Real')
+        ])
+        fig_g = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Task", color="Color", color_discrete_map={'Plan': '#00C851', 'Real': '#ff4444'})
+        fig_g = layout_blanco(fig_g, "")
+        st.plotly_chart(fig_g, use_container_width=True)
 
 # ==================================================
-# VISTA 4: CHAT PRO (DRILL-DOWN)
+# VISTA 3: DASHBOARD (DETALLE COMPLETO)
+# ==================================================
+elif st.session_state.pagina_actual == 'dashboard':
+    moneda_sim = "$" if st.session_state.moneda == "USD ($)" else "S/."
+    st.title(f"⚡ Monitor Financiero ({st.session_state.moneda})")
+    col_back, _ = st.columns([1, 6])
+    with col_back:
+        if st.button("⬅ Volver"): navegar_a('home')
+
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("💵 Caja", f"{moneda_sim} 15.4 M", "-12%", border=True)
+    k2.metric("🛢️ WTI", "$76.50", "+4.5%", border=True)
+    k3.metric("📉 Deuda", f"{moneda_sim} 8.5 B", "+3.6%", border=True)
+    k4.metric("📊 EBITDA", f"{moneda_sim} 120 M", "+8.2%", border=True)
+
+    st.markdown("---")
+    df_fin = get_dashboard_data()
+    df_rank = get_rankings()
+
+    c_main, c_side = st.columns([2, 1])
+    with c_main:
+        st.markdown("**Ingresos vs Gastos (YoY)**")
+        fig_bar = go.Figure()
+        fig_bar.add_trace(go.Bar(x=df_fin['Mes'], y=df_fin['2024'], name='2024', marker_color='#00C851'))
+        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['2023'], name='2023', line=dict(color='white', dash='dash')))
+        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['EBITDA'], name='EBITDA', fill='tozeroy', line=dict(color='#33b5e5', width=0), opacity=0.3))
+        fig_bar = layout_blanco(fig_bar, "")
+        fig_bar.update_layout(barmode='overlay', height=400)
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    with c_side:
+        st.markdown("**🏆 Centros de Costo**")
+        fig_rank = go.Figure()
+        fig_rank.add_trace(go.Bar(
+            y=df_rank['Unidad'], x=df_rank['Gasto_M'], orientation='h',
+            marker_color=['#ff4444', '#ffbb33', '#00C851', '#33b5e5', '#aa66cc'],
+            text=df_rank['Cambio_Anual'], textposition='auto', textfont_color='white'
+        ))
+        fig_rank = layout_blanco(fig_rank, "")
+        fig_rank.update_layout(height=400)
+        st.plotly_chart(fig_rank, use_container_width=True)
+
+    st.markdown("---")
+    c_risk, c_table = st.columns([1, 2])
+    with c_risk:
+        st.markdown("**Nivel de Riesgo**")
+        fig_gauge = go.Figure(go.Indicator(
+            mode = "gauge+number", value = 35, number = {'font': {'color': 'white'}},
+            gauge = {
+                'axis': {'range': [0, 100], 'tickcolor': 'white'}, 'bar': {'color': "#ff4444"},
+                'steps': [{'range': [0, 50], 'color': "rgba(0, 255, 0, 0.2)"}, {'range': [80, 100], 'color': "rgba(255, 0, 0, 0.2)"}],
+                'threshold': {'line': {'color': "white", 'width': 4}, 'thickness': 0.75, 'value': 85}
+            }
+        ))
+        fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), height=250)
+        st.plotly_chart(fig_gauge, use_container_width=True)
+    
+    with c_table:
+        st.markdown("#### 📋 Pasivos Bancarios")
+        df_bancos = pd.DataFrame({
+            'Banco': ['Nación', 'Bonos Int.', 'Extranjero A', 'Local B'],
+            'Deuda': [2500, 4000, 1200, 800], 'Tasa': ['4.5%', '7.2%', '6.1%', '5.8%'], 'Vence': ['2030', '2047', '2026', '2025']
+        })
+        st.dataframe(df_bancos, use_container_width=True, hide_index=True)
+
+# ==================================================
+# VISTA 4: CHAT (CON CEREBRO 4.0 & UI PRO)
 # ==================================================
 elif st.session_state.pagina_actual == 'chat':
     st.title("🤖 Petrolito AI: Drill-Down Analysis")
@@ -331,7 +488,7 @@ elif st.session_state.pagina_actual == 'chat':
 
     chat_container = st.container()
 
-    # Renderizar historial con estilo
+    # Historial Renderizado
     with chat_container:
         for msg in st.session_state.messages:
             if msg["role"] == "assistant":
@@ -349,21 +506,22 @@ elif st.session_state.pagina_actual == 'chat':
             else:
                 st.markdown(f"""<div style="text-align: right;"><div class="user-card">{msg["content"]}</div></div>""", unsafe_allow_html=True)
 
-    # Input del usuario
+    # Input Usuario
     if prompt := st.chat_input("Consulte sobre Deuda, Talara o Macroeconomía..."):
-        # Guardar
+        # Guardar Msg Usuario
         st.session_state.messages.append({"role": "user", "content": prompt})
         
-        # Renderizar mensaje usuario (Hack visual para instantaneidad)
+        # Hack Visual: Mostrar inmediatamente el mensaje del usuario
         with chat_container:
             st.markdown(f"""<div style="text-align: right;"><div class="user-card">{prompt}</div></div>""", unsafe_allow_html=True)
 
-        # Procesar respuesta IA
+        # Procesamiento IA
         with chat_container:
             placeholder = st.empty()
             
-            # Indicador de estado visual
+            # Indicador Visual de Profundidad (Status Bar)
             tema_actual = st.session_state.contexto_chat.get('tema_actual', 'General') or 'General'
+            # Calculamos el nivel futuro solo para mostrarlo (la lógica real está en la función)
             nivel_futuro = min(st.session_state.contexto_chat.get('nivel_profundidad', 0) + 1, 2)
             
             placeholder.markdown(f"""
@@ -372,12 +530,12 @@ elif st.session_state.pagina_actual == 'chat':
             </div>
             """, unsafe_allow_html=True)
             
-            time.sleep(1.0) # Pausa para simular cómputo
+            time.sleep(1.0) # Simulación de cómputo
             
-            # Lógica del Cerebro
+            # Llamada al Cerebro Financiero Avanzado
             respuesta_ia = cerebro_financiero_avanzado(prompt)
             
-            # Renderizar respuesta final
+            # Renderizar Respuesta Final
             placeholder.markdown(f"""
             <div class="bot-card">
                 <div style="display: flex; align-items: center; margin-bottom: 8px;">
