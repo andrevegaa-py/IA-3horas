@@ -16,24 +16,24 @@ def navegar_a(pagina):
     st.session_state.pagina_actual = pagina
     st.rerun()
 
-# --- 3. ESTILOS CSS (TECH-FORMAL) ---
+# --- 3. ESTILOS CSS (MODO DARK TECH - LETRAS BLANCAS) ---
 estilos_tech = """
 <style>
     /* Fondo Tecnológico */
     [data-testid="stAppViewContainer"] {
-        background-image: linear-gradient(rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.96)), 
+        background-image: linear-gradient(rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98)), 
                           url("https://img.freepik.com/free-vector/abstract-technology-background-with-connecting-dots-lines_1048-12334.jpg");
         background-size: cover; background-position: center; background-attachment: fixed;
     }
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
     
-    /* Tipografía y Colores */
-    h1, h2, h3, h4, p, li, div { color: #E2E8F0 !important; font-family: 'Segoe UI', sans-serif; }
+    /* FORZAR LETRAS BLANCAS EN TODA LA APP */
+    h1, h2, h3, h4, h5, p, li, div, span, label { color: #FFFFFF !important; font-family: 'Segoe UI', sans-serif; }
     
     /* Tarjetas Glassmorphism */
     .glass-card {
         background-color: rgba(30, 41, 59, 0.6);
-        border: 1px solid rgba(148, 163, 184, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         padding: 20px;
         backdrop-filter: blur(8px);
@@ -48,9 +48,15 @@ estilos_tech = """
     .stButton>button:hover {
         background-color: #38BDF8; color: #0F172A; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
     }
+    .stButton>button p { color: inherit !important; } /* Fix para texto de botones */
     
     /* Métricas */
-    [data-testid="stMetricValue"] { color: #38BDF8 !important; text-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+    [data-testid="stMetricValue"] { color: #38BDF8 !important; text-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
+    [data-testid="stMetricLabel"] { color: #E0E0E0 !important; }
+    [data-testid="stMetricDelta"] { color: #E0E0E0 !important; }
+    
+    /* Tablas */
+    [data-testid="stDataFrame"] { background-color: rgba(0,0,0,0.2); }
 </style>
 """
 st.markdown(estilos_tech, unsafe_allow_html=True)
@@ -61,19 +67,36 @@ IMG_TALARA = "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/07/19/00096
 IMG_DASHBOARD = "https://img.freepik.com/free-photo/business-concept-with-graphic-holography_23-2149160929.jpg"
 IMG_ROBOT = "https://img.freepik.com/free-photo/rendering-smart-home-device_23-2151039302.jpg"
 
-# --- FUNCIONES DE DATOS ---
+# --- FUNCIONES DE DATOS AVANZADOS ---
 def get_dashboard_data():
     meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun']
-    ingresos = [120, 135, 110, 140, 155, 160]
+    ingresos_2024 = [120, 135, 110, 140, 155, 160]
+    ingresos_2023 = [110, 125, 115, 130, 140, 145] # Data año pasado
     gastos = [115, 130, 125, 135, 145, 150] 
-    ebitda = [x - y for x, y in zip(ingresos, gastos)]
-    return pd.DataFrame({'Mes': meses, 'Ingresos': ingresos, 'Gastos': gastos, 'EBITDA': ebitda})
+    ebitda = [x - y for x, y in zip(ingresos_2024, gastos)]
+    return pd.DataFrame({'Mes': meses, '2024': ingresos_2024, '2023': ingresos_2023, 'Gastos': gastos, 'EBITDA': ebitda})
 
-def get_expense_breakdown():
-    return pd.DataFrame({
-        'Categoría': ['Servicio Deuda (Talara)', 'Compra Crudo/Insumos', 'Operaciones (OPEX)', 'Personal', 'Otros'],
-        'Monto': [45, 30, 15, 7, 3]
+def get_rankings():
+    # Ranking de Centros de Costo (Donde se gasta más)
+    costos = pd.DataFrame({
+        'Unidad': ['Refinería Talara', 'Oleoducto Norperuano', 'Planta Ventas Lima', 'Administración Central', 'Logística Selva'],
+        'Gasto_M': [850, 320, 150, 120, 80],
+        'Cambio_Anual': ['+12%', '+5%', '-2%', '+1%', '+4%']
     })
+    return costos
+
+# --- HELPERS PARA GRÁFICOS BLANCOS ---
+def layout_blanco(fig, titulo):
+    fig.update_layout(
+        title=titulo,
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'), # <--- CLAVE: Letras blancas
+        xaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='white'),
+        yaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='white'),
+        legend=dict(font=dict(color='white'))
+    )
+    return fig
 
 # ==================================================
 # BARRA LATERAL
@@ -84,7 +107,7 @@ with st.sidebar:
     if st.button("🏠 INICIO"): navegar_a('home')
     st.markdown("---")
     st.info("🔹 **Estado:** En Línea")
-    st.caption("v12.1 - Powered by Petrolito AI")
+    st.caption("v13.0 - Dashboard Pro")
 
 # ==================================================
 # VISTA 1: HOME
@@ -125,15 +148,12 @@ elif st.session_state.pagina_actual == 'talara':
     fig = go.Figure()
     fig.add_trace(go.Bar(x=df_t['Año'], y=df_t['Inversion'], name='Capex (Inversión)', marker_color='#38BDF8'))
     fig.add_trace(go.Scatter(x=df_t['Año'], y=df_t['Deuda'], name='Deuda Acumulada', yaxis='y2', line=dict(color='#F472B6', width=3)))
-    fig.update_layout(
-        title="Capex vs Deuda ($ Billones)", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E2E8F0'), yaxis=dict(gridcolor='rgba(255,255,255,0.1)'),
-        yaxis2=dict(overlaying='y', side='right'), legend=dict(orientation="h", y=1.1)
-    )
+    fig = layout_blanco(fig, "Capex vs Deuda ($ Billones)")
+    fig.update_layout(yaxis2=dict(overlaying='y', side='right', color='white'), legend=dict(orientation="h", y=1.1))
     st.plotly_chart(fig, use_container_width=True)
 
 # ==================================================
-# VISTA 3: DASHBOARD
+# VISTA 3: DASHBOARD (MEJORADO)
 # ==================================================
 elif st.session_state.pagina_actual == 'dashboard':
     st.title("⚡ Monitor Financiero Integral")
@@ -141,62 +161,87 @@ elif st.session_state.pagina_actual == 'dashboard':
     with col_back:
         if st.button("⬅ Volver"): navegar_a('home')
 
-    st.markdown("#### 1. Indicadores de Liquidez y Mercado")
+    # --- SECCIÓN 1: KPIs COMPARATIVOS (ANUALES) ---
+    st.markdown("#### 1. Indicadores Clave & Variación Anual")
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("💵 Caja Disponible", "$15.4 M", "-2.1%", border=True)
-    k2.metric("🛢️ Precio WTI", "$76.50", "+1.2%", border=True)
-    k3.metric("📉 Deuda Total", "$8.5 B", "Estable", border=True)
-    k4.metric("📊 Margen Refinación", "$11.2/bbl", "+0.5", border=True)
+    # Usamos métricas con deltas para mostrar cambio anual
+    k1.metric("💵 Caja Disponible", "$15.4 M", "-12% vs 2023", border=True)
+    k2.metric("🛢️ Precio WTI", "$76.50", "+4.5% vs 2023", border=True)
+    k3.metric("📉 Deuda Total", "$8.5 B", "+3.6% vs 2023", border=True) # Deuda subió (rojo automático)
+    k4.metric("📊 EBITDA Ajustado", "$120 M", "+8.2% vs 2023", border=True)
 
     st.markdown("---")
-    st.markdown("#### 2. Análisis de Resultados y Gastos")
+    
+    # --- SECCIÓN 2: ANÁLISIS GRÁFICO ---
+    st.markdown("#### 2. Evolución Financiera (Ingresos YoY)")
     
     df_fin = get_dashboard_data()
-    df_exp = get_expense_breakdown()
+    df_rank = get_rankings()
 
-    c_left, c_right = st.columns([2, 1])
-    with c_left:
+    c_main, c_side = st.columns([2, 1])
+
+    with c_main:
+        # GRÁFICO COMPARATIVO 2023 vs 2024
         fig_bar = go.Figure()
-        fig_bar.add_trace(go.Bar(x=df_fin['Mes'], y=df_fin['Ingresos'], name='Ingresos', marker_color='#00C851'))
-        fig_bar.add_trace(go.Bar(x=df_fin['Mes'], y=df_fin['Gastos'], name='Gastos', marker_color='#ff4444'))
-        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['EBITDA'], name='EBITDA', line=dict(color='yellow', width=3, dash='dot')))
-        fig_bar.update_layout(barmode='group', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                              font=dict(color='#E2E8F0'), height=350, margin=dict(l=0, r=0, t=20, b=0))
+        # Barras 2024
+        fig_bar.add_trace(go.Bar(x=df_fin['Mes'], y=df_fin['2024'], name='Ingresos 2024', marker_color='#00C851'))
+        # Línea 2023 (Comparativa)
+        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['2023'], name='Ingresos 2023', line=dict(color='white', width=2, dash='dash')))
+        # Área de EBITDA
+        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['EBITDA'], name='EBITDA Actual', fill='tozeroy', line=dict(color='#33b5e5', width=0), opacity=0.3))
+        
+        fig_bar = layout_blanco(fig_bar, "Comparativa Ingresos: 2023 vs 2024")
+        fig_bar.update_layout(barmode='overlay', height=400)
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    with c_right:
-        fig_pie = px.pie(df_exp, values='Monto', names='Categoría', hole=0.4, color_discrete_sequence=px.colors.sequential.RdBu)
-        fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                              font=dict(color='#E2E8F0'), height=350, showlegend=True, legend=dict(orientation="h", y=-0.1))
-        st.plotly_chart(fig_pie, use_container_width=True)
+    with c_side:
+        # RANKING DE GASTOS (NUEVO)
+        st.markdown("**🏆 Ranking: Centros de Costo**")
+        # Usamos un gráfico de barras horizontales para el ranking
+        fig_rank = go.Figure()
+        fig_rank.add_trace(go.Bar(
+            y=df_rank['Unidad'], 
+            x=df_rank['Gasto_M'], 
+            orientation='h',
+            marker_color=['#ff4444', '#ffbb33', '#00C851', '#33b5e5', '#aa66cc'],
+            text=df_rank['Cambio_Anual'],
+            textposition='auto'
+        ))
+        fig_rank = layout_blanco(fig_rank, "Top 5 Gastos (Millones $)")
+        fig_rank.update_layout(height=400, margin=dict(l=10, r=10, t=40, b=10))
+        st.plotly_chart(fig_rank, use_container_width=True)
 
+    # --- SECCIÓN 3: MEDIDOR DE RIESGO Y RANKING DEUDA ---
     st.markdown("---")
-    c_risk, c_info = st.columns([1, 2])
+    c_risk, c_table = st.columns([1, 2])
+    
     with c_risk:
-        # --- CORRECCIÓN DEL ERROR AQUÍ ---
+        # GAUGE CHART (Color Blanco en texto asegurado)
         fig_gauge = go.Figure(go.Indicator(
-            mode = "gauge+number", 
-            value = 35, 
-            title = {'text': "Nivel de Estrés Financiero"},
+            mode = "gauge+number", value = 35, 
+            title = {'text': "Nivel de Estrés Financiero", 'font': {'color': 'white'}}, # Título blanco
+            number = {'font': {'color': 'white'}}, # Número blanco
             gauge = {
-                'axis': {'range': [0, 100]}, 
+                'axis': {'range': [0, 100], 'tickcolor': 'white'}, 
                 'bar': {'color': "#ff4444"},
-                'steps': [
-                    {'range': [0, 50], 'color': "rgba(0, 255, 0, 0.1)"}, 
-                    {'range': [80, 100], 'color': "rgba(255, 0, 0, 0.1)"}
-                ],
-                'threshold': { # Ahora threshold está dentro de gauge
-                    'line': {'color': "white", 'width': 4}, 
-                    'thickness': 0.75, 
-                    'value': 85
-                }
+                'steps': [{'range': [0, 50], 'color': "rgba(0, 255, 0, 0.2)"}, {'range': [80, 100], 'color': "rgba(255, 0, 0, 0.2)"}],
+                'threshold': {'line': {'color': "white", 'width': 4}, 'thickness': 0.75, 'value': 85}
             }
         ))
-        fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='#E2E8F0'), height=250, margin=dict(t=30, b=0))
+        fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), height=300)
         st.plotly_chart(fig_gauge, use_container_width=True)
     
-    with c_info:
-        st.info("ℹ️ **Petrolito informa:** El nivel de estrés es moderado. Se recomienda vigilar la liquidez.")
+    with c_table:
+        st.markdown("#### 📋 Detalle de Pasivos por Banco (Ranking)")
+        # Tabla estilizada con Pandas
+        df_bancos = pd.DataFrame({
+            'Institución': ['Banco Nación', 'Bonos Internacionales', 'Banco Extranjero A', 'Banco Local B'],
+            'Monto Deuda ($M)': [2500, 4000, 1200, 800],
+            'Tasa Interés': ['4.5%', '7.2%', '6.1%', '5.8%'],
+            'Vencimiento': ['2030', '2047', '2026', '2025']
+        })
+        # Mostramos la tabla ocupando el ancho
+        st.dataframe(df_bancos, use_container_width=True, hide_index=True)
 
 # ==================================================
 # VISTA 4: CHAT PETROLITO
@@ -222,19 +267,16 @@ elif st.session_state.pagina_actual == 'chat':
         resp = "Procesando..."
         with st.spinner("Petrolito está pensando..."):
             time.sleep(1)
-            # Lógica de Petrolito
             if "deuda" in prompt.lower(): resp = "La deuda asciende a $8.5 Billones. Aunque es alta, Petrolito te informa que está estructurada a largo plazo gracias a los bonos emitidos."
-            elif "gasto" in prompt.lower(): resp = "Detecto que el 45% de los gastos son financieros (pagos de Talara). Sugiero optimizar el OPEX para liberar caja."
+            elif "gasto" in prompt.lower(): resp = "El Centro de Costo 'Refinería Talara' representa el mayor gasto operativo ($850M), con un incremento del 12% respecto al año anterior."
             else: resp = "Interesante consulta. Basado en mis registros históricos, esa métrica es estable. ¿Te gustaría ver una proyección a 3 meses?"
         
         st.session_state.messages.append({"role": "assistant", "content": resp})
         with chat_container:
             st.chat_message("assistant", avatar="🤖").write(resp)
 
-    # --- SECCIÓN DE AYUDA Y BENEFICIOS ---
     st.markdown("---")
     col_sugg, col_benef = st.columns(2)
-
     with col_sugg:
         st.markdown("#### 💡 Preguntas para Petrolito")
         st.markdown("""
@@ -242,7 +284,7 @@ elif st.session_state.pagina_actual == 'chat':
             <ul style="list-style-type: none; padding: 0; margin: 0;">
                 <li style="margin-bottom: 10px;">🔹 <i>"¿Cómo cerró la caja ayer?"</i></li>
                 <li style="margin-bottom: 10px;">🔹 <i>"Explícame la deuda de Talara."</i></li>
-                <li style="margin-bottom: 10px;">🔹 <i>"¿Qué pasa si sube el petróleo?"</i></li>
+                <li style="margin-bottom: 10px;">🔹 <i>"¿Qué centro de costo gasta más?"</i></li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
