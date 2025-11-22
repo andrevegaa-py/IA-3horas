@@ -4,223 +4,226 @@ import numpy as np
 import plotly.graph_objects as go
 import time
 
-# --- 1. CONFIGURACIÓN AMIGABLE ---
-st.set_page_config(page_title="Portal Financiero Petroperú", layout="wide", page_icon="🇵🇪")
+# --- 1. CONFIGURACIÓN DE PÁGINA ---
+st.set_page_config(page_title="Petroperú AI Hub", layout="wide", page_icon="🧬")
 
-# --- 2. ESTILO CSS (CLEAN & CORPORATE) ---
-# Usamos colores corporativos (Rojo Petroperú y Gris), bordes redondeados y sombras suaves.
-custom_css = """
+# --- 2. GESTIÓN DE NAVEGACIÓN (SESSION STATE) ---
+if 'pagina_actual' not in st.session_state:
+    st.session_state.pagina_actual = 'home'
+
+def navegar_a(pagina):
+    st.session_state.pagina_actual = pagina
+    st.rerun()
+
+# --- 3. ESTILOS CSS (FONDO TECNOLÓGICO FORMAL) ---
+# Fondo azul oscuro profundo con partículas sutiles + Tarjetas estilo "Glassmorphism"
+estilos_tech = """
 <style>
-    /* Importar fuente moderna */
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
-
-    html, body, [class*="css"]  {
-        font-family: 'Roboto', sans-serif;
-        background-color: #F5F7F9; /* Fondo gris muy suave */
+    /* Fondo Tecnológico Formal */
+    [data-testid="stAppViewContainer"] {
+        background-image: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95)), 
+                          url("https://img.freepik.com/free-vector/abstract-technology-background-with-connecting-dots-lines_1048-12334.jpg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    
+    [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
+    
+    /* Estilo de Textos */
+    h1, h2, h3, h4, p, li {
+        color: #E2E8F0 !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* Estilo de los contenedores (Tarjetas) */
-    .stCard {
-        background-color: white;
-        padding: 20px;
+    /* Tarjetas Interactivas (Glassmorphism) */
+    div.css-1r6slb0.e1tzin5v2 {
+        background-color: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.2);
         border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
-    /* Botones personalizados */
+    /* Botones Estilizados (Cyber-Formal) */
     .stButton>button {
-        background-color: #CE2029; /* Rojo Petroperú */
-        color: white;
+        width: 100%;
+        background-color: #0F172A;
+        color: #38BDF8; /* Azul Neon Suave */
+        border: 1px solid #38BDF8;
         border-radius: 8px;
-        border: none;
-        padding: 10px 20px;
-        font-weight: bold;
-        transition: all 0.3s;
+        padding: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
     }
     .stButton>button:hover {
-        background-color: #A51920;
-        transform: scale(1.02);
-    }
-
-    /* Títulos */
-    h1, h2, h3 {
-        color: #2C3E50;
+        background-color: #38BDF8;
+        color: #0F172A;
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
     }
     
     /* Métricas */
     [data-testid="stMetricValue"] {
-        color: #CE2029;
-        font-weight: bold;
+        color: #38BDF8 !important;
+        text-shadow: 0 0 5px rgba(56, 189, 248, 0.3);
     }
 </style>
 """
-st.markdown(custom_css, unsafe_allow_html=True)
+st.markdown(estilos_tech, unsafe_allow_html=True)
 
-# --- DATOS (BACKEND) ---
-def get_data():
-    # Generamos datos simples para no complicar la demo
-    fechas = pd.date_range(end=pd.Timestamp.now(), periods=30)
-    caja = np.linspace(-50, 20, 30) + np.random.normal(0, 5, 30) # Simula recuperación leve
-    return pd.DataFrame({'Fecha': fechas, 'Caja': caja})
+# --- URLS IMÁGENES ---
+IMG_TALARA = "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/07/19/000969550W.jpg"
+IMG_DASHBOARD = "https://img.freepik.com/free-photo/business-concept-with-graphic-holography_23-2149160929.jpg"
+IMG_ROBOT = "https://img.freepik.com/free-photo/rendering-smart-home-device_23-2151039302.jpg"
+IMG_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Petroper%C3%fa_logo.svg/1200px-Petroper%C3%fa_logo.svg.png"
 
-# --- BARRA LATERAL (MENÚ SIMPLE) ---
+# --- FUNCIONES DE DATOS ---
+def get_data_talara():
+    data = {
+        'Año': [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+        'Deuda': [5.2, 5.5, 5.8, 6.2, 6.5, 7.8, 8.2, 8.5],
+        'Inversion': [1400, 1100, 900, 600, 500, 350, 150, 50]
+    }
+    return pd.DataFrame(data)
+
+# ==================================================
+# BARRA LATERAL (SIEMPRE VISIBLE)
+# ==================================================
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Petroper%C3%fa_logo.svg/1200px-Petroper%C3%fa_logo.svg.png", width=180)
-    st.markdown("### 📌 Menú Principal")
+    # Logo con fondo blanco para que se vea bien
+    st.markdown(f"<div style='background: white; padding: 10px; border-radius: 10px; text-align: center;'><img src='{IMG_LOGO}' width='150'></div>", unsafe_allow_html=True)
+    st.markdown("### ⚙️ Centro de Control")
     
-    # Navegación con Radio Button que parece menú
-    opcion = st.radio(
-        "Seleccione una opción:",
-        ["🏠 Inicio", "📊 Ver Gráficos", "💬 Asistente Virtual"],
-        label_visibility="collapsed"
-    )
+    if st.button("🏠 INICIO / MENÚ"):
+        navegar_a('home')
     
     st.markdown("---")
-    st.info("💡 **Ayuda:** Si tienes dudas sobre algún término, ve a la sección 'Asistente Virtual'.")
+    st.info("🔹 **Estado del Sistema:** En Línea")
+    st.caption("v10.0 Tech-Enterprise")
 
-# --- LÓGICA DE PÁGINAS ---
+# ==================================================
+# VISTA 1: HOME (EL MENÚ INTERACTIVO VISUAL)
+# ==================================================
+if st.session_state.pagina_actual == 'home':
+    st.title("🚀 Petroperú: Plataforma de Inteligencia Financiera")
+    st.markdown("#### Seleccione un módulo para iniciar el análisis:")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-# === PÁGINA 1: BIENVENIDA (HOME) ===
-if "Inicio" in opcion:
-    st.title("👋 ¡Bienvenido al Portal Financiero!")
-    st.markdown("#### Información clara para tomar mejores decisiones.")
-    
-    st.markdown("""
-    <div class="stCard">
-        Este sistema te ayuda a visualizar el estado financiero de Petroperú de forma sencilla.
-        No necesitas ser un experto para usarlo.
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Tarjetas de acceso rápido (Columnas)
     col1, col2, col3 = st.columns(3)
-    
+
+    # TARJETA 1: IMPACTO TALARA
     with col1:
-        st.image("https://cdn-icons-png.flaticon.com/512/2830/2830323.png", width=80) # Icono gráfico
-        st.subheader("Estado Actual")
-        st.caption("Revisa cómo va la caja y la deuda hoy.")
-    
+        st.image(IMG_TALARA, use_column_width=True)
+        st.markdown("### 🏭 Impacto Refinería")
+        st.caption("Análisis histórico de la deuda, inversión (Capex) y sostenibilidad del proyecto Talara.")
+        if st.button("Ver Análisis Talara ➔", key="btn_talara"):
+            navegar_a('talara')
+
+    # TARJETA 2: TIEMPO REAL
     with col2:
-        st.image("https://cdn-icons-png.flaticon.com/512/4712/4712009.png", width=80) # Icono robot
-        st.subheader("Pregúntale a la IA")
-        st.caption("¿Tienes dudas? Nuestro asistente te explica.")
-        
+        st.image(IMG_DASHBOARD, use_column_width=True)
+        st.markdown("### ⚡ Monitor en Vivo")
+        st.caption("Dashboard de tesorería, flujo de caja diario y cotización del crudo WTI en tiempo real.")
+        if st.button("Ver Dashboard ➔", key="btn_dash"):
+            navegar_a('dashboard')
+
+    # TARJETA 3: ASISTENTE IA
     with col3:
-        st.image("https://cdn-icons-png.flaticon.com/512/1584/1584892.png", width=80) # Icono alerta
-        st.subheader("Alertas")
-        st.caption("El sistema te avisará si hay riesgos.")
+        st.image(IMG_ROBOT, use_column_width=True)
+        st.markdown("### 🤖 Asesor IA")
+        st.caption("Consultas financieras avanzadas con lenguaje natural. Pregunte sobre deuda, caja o riesgos.")
+        if st.button("Iniciar Chat ➔", key="btn_chat"):
+            navegar_a('chat')
 
-    st.success("✅ **Sistema Operativo:** Todos los servicios están funcionando correctamente.")
-
-# === PÁGINA 2: GRÁFICOS (VISUAL) ===
-elif "Gráficos" in opcion:
-    st.title("📊 Tablero de Control")
-    st.markdown("Aquí puedes ver la evolución del dinero disponible en la empresa.")
+# ==================================================
+# VISTA 2: IMPACTO TALARA
+# ==================================================
+elif st.session_state.pagina_actual == 'talara':
+    st.title("🏭 Análisis de Impacto: Nueva Refinería Talara")
+    st.markdown("Evolución de la Deuda Estructural vs Inversión de Capital")
     
-    # Botón grande y claro
-    if st.button("🔄 Actualizar Datos Ahora"):
-        st.toast("¡Datos actualizados con éxito!", icon="✅") # Notificación bonita
-        time.sleep(1)
-
-    df = get_data()
-    ultimo_valor = df['Caja'].iloc[-1]
-
-    # Métricas grandes con explicación (Tooltip)
-    c1, c2 = st.columns(2)
-    c1.metric(
-        label="💰 Dinero en Caja (Millones USD)",
-        value=f"${ultimo_valor:.2f} M",
-        delta="1.5% vs ayer",
-        help="Este es el dinero líquido disponible para pagar deudas hoy."
-    )
-    c2.metric(
-        label="📉 Deuda Talara (Aprox)",
-        value="$8,500 M",
-        delta_color="off",
-        help="Monto total adeudado por la construcción de la refinería."
-    )
-
-    # Gráfico limpio
-    st.subheader("Evolución del último mes")
+    if st.button("⬅ Volver al Menú Principal"):
+        navegar_a('home')
+    
+    df = get_data_talara()
+    
+    # Gráfico Tech
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=df['Fecha'], y=df['Caja'],
-        mode='lines+markers',
-        name='Flujo de Caja',
-        line=dict(color='#CE2029', width=3), # Rojo corporativo
-        fill='tozeroy',
-        fillcolor='rgba(206, 32, 41, 0.1)' # Relleno suave
-    ))
+    fig.add_trace(go.Bar(x=df['Año'], y=df['Inversion'], name='Inversión (Capex)', marker_color='#38BDF8')) # Azul Neon
+    fig.add_trace(go.Scatter(x=df['Año'], y=df['Deuda'], name='Deuda Total ($B)', yaxis='y2', line=dict(color='#F472B6', width=3))) # Rosa Neon
+    
     fig.update_layout(
-        plot_bgcolor='white',
-        hovermode="x unified",
-        margin=dict(l=20, r=20, t=40, b=20),
-        yaxis=dict(gridcolor='#f0f0f0') # Rejilla muy suave
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#E2E8F0'),
+        yaxis=dict(title="Inversión (M USD)", gridcolor='rgba(255,255,255,0.1)'),
+        yaxis2=dict(title="Deuda Acumulada ($B)", overlaying='y', side='right'),
+        legend=dict(orientation="h", y=1.1)
     )
     st.plotly_chart(fig, use_container_width=True)
     
-    with st.expander("Ver explicación del gráfico"):
-        st.write("La línea roja muestra cuánto dinero tenemos. Si baja de 0, significa que estamos usando deuda para operar.")
+    c1, c2 = st.columns(2)
+    c1.info("La línea **Rosada** muestra cómo la deuda escaló hasta los $8.5B.")
+    c2.info("Las barras **Azules** muestran el dinero inyectado en la construcción.")
 
-# === PÁGINA 3: ASISTENTE (CHAT AMIGABLE) ===
-elif "Asistente" in opcion:
-    st.title("💬 Asistente Virtual")
-    st.markdown("Hola, soy tu asistente financiero. No necesitas usar términos complicados, solo pregúntame.")
+# ==================================================
+# VISTA 3: DASHBOARD TIEMPO REAL
+# ==================================================
+elif st.session_state.pagina_actual == 'dashboard':
+    st.title("⚡ Monitor de Tesorería en Tiempo Real")
+    
+    col_btn, col_space = st.columns([1, 5])
+    with col_btn:
+        if st.button("⬅ Volver"):
+            navegar_a('home')
 
-    # Chat container
-    chat_container = st.container()
+    # Simulador
+    caja_val = 15.4 
+    wti_val = 76.5
+    
+    # Métricas estilo Tech
+    c1, c2, c3 = st.columns(3)
+    c1.metric("💵 Caja Disponible", f"${caja_val} M", "-0.5%")
+    c2.metric("🛢️ Precio WTI", f"${wti_val}", "+1.2%")
+    c3.markdown("### Estado: :orange[ALERTA MEDIA]")
 
-    # Historial
+    # Gráfico de Linea Neon
+    chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["Caja", "WTI", "Deuda"])
+    st.line_chart(chart_data)
+
+# ==================================================
+# VISTA 4: CHAT IA
+# ==================================================
+elif st.session_state.pagina_actual == 'chat':
+    st.title("🤖 Asesor Financiero Inteligente")
+    st.caption("Modo: Consultor Senior | Data: 2014-2025")
+    
+    if st.button("⬅ Volver al Menú"):
+        navegar_a('home')
+
+    # Chat UI
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "¡Hola! ¿En qué puedo ayudarte hoy? Selecciona una opción abajo o escribe tu duda."}]
+        st.session_state.messages = [{"role": "assistant", "content": "Bienvenido al centro de inteligencia. Analizo datos de Petroperú en tiempo real. ¿Desea revisar la deuda de Talara o el flujo de caja?"}]
 
-    with chat_container:
-        for msg in st.session_state.messages:
-            # Usamos avatares para que sea más visual
-            avatar = "🧑‍💻" if msg["role"] == "user" else "🤖"
-            st.chat_message(msg["role"], avatar=avatar).write(msg["content"])
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
 
-    # BOTONES DE PREGUNTAS RÁPIDAS (Para usuarios que no quieren escribir)
-    st.markdown("###### Preguntas frecuentes (Haz clic para preguntar):")
-    col_q1, col_q2, col_q3 = st.columns(3)
-    
-    pregunta_usuario = None
-    
-    if col_q1.button("¿Estamos en crisis?"):
-        pregunta_usuario = "¿Estamos en crisis financiera?"
-    if col_q2.button("Explícame la deuda"):
-        pregunta_usuario = "Explícame la deuda de Talara de forma simple"
-    if col_q3.button("¿Cuánto dinero hay?"):
-        pregunta_usuario = "¿Cuál es el flujo de caja hoy?"
-
-    # Input de texto (por si quieren escribir)
-    input_texto = st.chat_input("O escribe tu pregunta aquí...")
-
-    # Lógica unificada
-    prompt = pregunta_usuario if pregunta_usuario else input_texto
-
-    if prompt:
-        # Mostrar lo que el usuario "dijo"
+    if prompt := st.chat_input("Escriba su consulta financiera..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with chat_container:
-            st.chat_message("user", avatar="🧑‍💻").write(prompt)
-
-        # Respuesta amigable
-        resp = ""
-        with st.spinner('Consultando...'):
+        st.chat_message("user").write(prompt)
+        
+        # Lógica simple de respuesta
+        resp = "Procesando consulta..."
+        with st.spinner("Analizando nodos de datos..."):
             time.sleep(1)
-            p_low = prompt.lower()
-            
-            if "crisis" in p_low:
-                resp = "Actualmente estamos en una situación delicada (Alerta Naranja). Tenemos mucha deuda por pagar, pero la refinería ya está produciendo. Es como tener una hipoteca grande: aprieta, pero tenemos casa nueva."
-            elif "deuda" in p_low:
-                resp = "Imagina que pedimos un préstamo muy grande para construir la nueva refinería. Debemos cerca de $8,500 millones. Ahora tenemos que vender mucho combustible para ir pagando esa tarjeta de crédito gigante."
-            elif "dinero" in p_low or "caja" in p_low:
-                resp = "Hoy tenemos el dinero justo para operar. Estamos vigilando cada gasto para no quedarnos sin efectivo para comprar crudo."
+            if "deuda" in prompt.lower():
+                resp = "La deuda estructural asciende a **$8.5 Billones**. El apalancamiento es crítico debido al PMRT."
+            elif "talara" in prompt.lower():
+                resp = "La Refinería Talara ya está operativa, pero los costos financieros de su construcción siguen presionando la caja."
             else:
-                resp = "Buena pregunta. Básicamente, estamos trabajando para estabilizar la economía de la empresa tras la construcción de Talara. ¿Quieres saber algo más?"
-
+                resp = "Entendido. Basado en los indicadores actuales, sugiero cautela en el gasto operativo (OPEX)."
+        
         st.session_state.messages.append({"role": "assistant", "content": resp})
-        with chat_container:
-            st.chat_message("assistant", avatar="🤖").write(resp)
+        st.chat_message("assistant").write(resp)
