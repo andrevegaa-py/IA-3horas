@@ -16,7 +16,7 @@ if 'moneda' not in st.session_state:
 
 # --- ESTADO INTELIGENCIA ARTIFICIAL (MEMORIA) ---
 if "contexto_chat" not in st.session_state:
-    # Rastrea: Tema actual y Nivel de profundidad (0=Ejecutivo, 1=Analítico, 2=Técnico)
+    # Rastrea: Tema actual y Nivel de profundidad
     st.session_state.contexto_chat = {"tema_actual": None, "nivel_profundidad": 0}
 
 if "messages" not in st.session_state:
@@ -37,7 +37,7 @@ def navegar_a(pagina):
     st.session_state.pagina_actual = pagina
     st.rerun()
 
-# --- 3. ESTILOS CSS (VISUAL IMPACT) ---
+# --- 3. ESTILOS CSS (VISUAL IMPACT - MODO DARK PRO) ---
 estilos_tech = """
 <style>
     /* 1. FONDO GENERAL */
@@ -77,6 +77,13 @@ estilos_tech = """
     .stButton>button:hover {
         background-color: #38BDF8; color: #0F172A !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
     }
+    
+    /* BOTONES DE DESCARGA (NUEVO) */
+    .stDownloadButton>button {
+        background-color: #00C851 !important;
+        color: white !important;
+        border: none;
+    }
 
     /* 5. CHAT CARDS */
     .bot-card {
@@ -115,49 +122,33 @@ IMG_CARD_TALARA = "https://portal.andina.pe/EDPfotografia3/Thumbnail/2022/04/12/
 IMG_CARD_FINANCE = "https://img.freepik.com/free-photo/standard-quality-control-collage-concept_23-2149595831.jpg"
 IMG_CARD_AI = "https://img.freepik.com/free-photo/rpa-concept-with-blurry-hand-touching-screen_23-2149311914.jpg"
 
-# --- 4. CEREBRO FINANCIERO 4.0 (MODO CONSULTOR) ---
+# --- 4. CEREBRO FINANCIERO 4.0 (MODO CONSULTOR + MULTIMEDIA) ---
 
 class PetrolitoBrain:
     def __init__(self):
         self.USE_LIVE_API = False 
         
-        # BASE DE CONOCIMIENTO (Finanzas + Historia + Técnica)
+        # BASE DE CONOCIMIENTO COMPLETA
         self.knowledge_base = {
             "historia": [
-                {
-                    "nivel": 0,
-                    "titulo": "📜 Historia: Origen y Misión",
-                    "texto": "Petroperú nació el **24 de julio de 1969** tras la nacionalización de la *International Petroleum Company* en Talara. Su mandato original fue garantizar la seguridad energética nacional, controlando toda la cadena desde el pozo hasta el grifo.",
-                    "dato": "Origen: 1969 (Velasco) | Activo: Talara",
-                    "adjunto": "grafico_historia"
-                },
-                {
-                    "nivel": 1,
-                    "titulo": "📜 Historia: La Fragmentación (Años 90)",
-                    "texto": "En los 90 se privatizaron unidades rentables: la flota naviera, la planta de gas (Solgas) y refinerías satélites. La empresa perdió integración vertical, quedándose principalmente con el negocio de refinación (bajo margen) y transporte (Oleoducto).",
-                    "dato": "Privatizado: Solgas, Naviera, Grifos"
-                },
-                {
-                    "nivel": 2,
-                    "titulo": "📜 Historia: Ley 30130 y Retorno",
-                    "texto": "La Ley 30130 (2013) blindó la construcción de la Nueva Refinería Talara pero restringió nuevas inversiones. Hoy, la estrategia es volver al *Upstream* (Lotes I, VI, Z-69) para producir crudo propio y reducir el costo de la materia prima en Talara.",
-                    "dato": "Hito: Retorno al Upstream (Lotes I, VI)"
-                }
+                {"nivel": 0, "titulo": "📜 Historia: Origen y Misión", "texto": "Petroperú nació el **24 de julio de 1969** tras la nacionalización de la *International Petroleum Company* en Talara. Su mandato original fue garantizar la seguridad energética nacional, controlando toda la cadena.", "dato": "Origen: 1969 (Velasco) | Activo: Talara", "adjunto": "grafico_historia"},
+                {"nivel": 1, "titulo": "📜 Historia: La Fragmentación (Años 90)", "texto": "En los 90 se privatizaron unidades rentables: la flota naviera, la planta de gas (Solgas) y refinerías satélites. La empresa perdió integración vertical, quedándose principalmente con el refino.", "dato": "Privatizado: Solgas, Naviera, Grifos"},
+                {"nivel": 2, "titulo": "📜 Historia: Ley 30130 y Retorno", "texto": "La Ley 30130 (2013) blindó la construcción de la Nueva Refinería Talara pero restringió nuevas inversiones. Hoy, la estrategia es volver al *Upstream* (Lotes I, VI, Z-69) para producir crudo propio.", "dato": "Hito: Retorno al Upstream (Lotes I, VI)"}
             ],
             "deuda": [
-                {"nivel": 0, "titulo": "📉 Deuda: Situación Crítica", "texto": "La deuda total es de **USD 8.5 Billones**. La estructura de capital es insostenible sin apoyo estatal. Actualmente, el MEF otorga garantías para evitar el impago de combustibles importados.", "dato": "Pasivo Total: $8.5B", "adjunto": "tabla_deuda"},
-                {"nivel": 1, "titulo": "📉 Estructura de Pasivos", "texto": "El problema no es solo el monto, sino el plazo. Tenemos **$3,000 MM** en Bonos a largo plazo y **$1,300 MM** del crédito sindicado CESCE. Lo urgente es la deuda de corto plazo (capital de trabajo) que asfixia la caja.", "dato": "Bonos: $3.0B | CESCE: $1.3B"},
-                {"nivel": 2, "titulo": "📉 Riesgo de Liquidez y Yield", "texto": "Los bonos de Petroperú cotizan con un rendimiento (Yield) superior al 11%, reflejando alto riesgo de impago. Estamos en constante negociación ('Waivers') con la banca por incumplir ratios financieros (Deuda/EBITDA).", "dato": "Yield Mercado: >11%"}
+                {"nivel": 0, "titulo": "📉 Deuda: Situación Crítica", "texto": "La deuda total es de **USD 8.5 Billones**. La estructura de capital es insostenible sin apoyo estatal. Actualmente, el MEF otorga garantías para evitar el impago de combustibles.", "dato": "Pasivo Total: $8.5B", "adjunto": "tabla_deuda"},
+                {"nivel": 1, "titulo": "📉 Estructura de Pasivos", "texto": "El problema no es solo el monto, sino el plazo. Tenemos **$3,000 MM** en Bonos a largo plazo y **$1,300 MM** del crédito sindicado CESCE. Lo urgente es la deuda de corto plazo.", "dato": "Bonos: $3.0B | CESCE: $1.3B"},
+                {"nivel": 2, "titulo": "📉 Riesgo de Liquidez y Yield", "texto": "Los bonos de Petroperú cotizan con un rendimiento (Yield) superior al 11%, reflejando alto riesgo de impago. Estamos en constante negociación ('Waivers') con la banca.", "dato": "Yield Mercado: >11%"}
             ],
             "talara": [
-                {"nivel": 0, "titulo": "🏭 NRT: Operación Plena", "texto": "La Nueva Refinería Talara opera al 100% de capacidad (**95 KBPD**). Produce diésel y gasolinas Euro VI (menos de 50 ppm de azufre), cumpliendo la normativa ambiental vigente.", "dato": "Capacidad: 95,000 BPD"},
+                {"nivel": 0, "titulo": "🏭 NRT: Operación Plena", "texto": "La Nueva Refinería Talara opera al 100% de capacidad (**95 KBPD**). Produce diésel y gasolinas Euro VI (menos de 50 ppm de azufre), cumpliendo la normativa ambiental.", "dato": "Capacidad: 95,000 BPD"},
                 {"nivel": 1, "titulo": "🏭 Margen de Refino", "texto": "La rentabilidad depende del diferencial de precios (Crack Spread). Con la tecnología actual, buscamos un margen de **$10 a $12 por barril**, superior a los $4 de la refinería antigua.", "dato": "Target Margen: $10-12/bbl"},
-                {"nivel": 2, "titulo": "🏭 Flexicoking: El Corazón Técnico", "texto": "La unidad de **Flexicoking** (licencia ExxonMobil) es la joya técnica. Convierte lo más barato (residuo de vacío) en productos caros y genera gas para que la refinería se autoabastezca de energía, reduciendo costos.", "dato": "Tecnología: Conversión Profunda"}
+                {"nivel": 2, "titulo": "🏭 Flexicoking: El Corazón Técnico", "texto": "La unidad de **Flexicoking** (licencia ExxonMobil) es la joya técnica. Convierte lo más barato (residuo de vacío) en productos caros y genera gas para autogeneración.", "dato": "Tecnología: Conversión Profunda"}
             ],
             "macro": [
-                {"nivel": 0, "titulo": "🌍 Entorno: Volatilidad", "texto": "El negocio está expuesto al precio internacional del petróleo (WTI) y a la inestabilidad política. Las agencias de rating (S&P, Fitch) nos califican como bono basura ('Junk') debido a la debilidad financiera.", "dato": "Rating: CCC+ / BB+"},
-                {"nivel": 1, "titulo": "🌍 Tipo de Cambio y Caja", "texto": "Existe un descalce estructural: Compramos crudo en Dólares y vendemos en Soles. Cuando el dólar sube (>3.80), necesitamos más soles para pagar la misma deuda, lo que drena la liquidez.", "dato": "Riesgo FX: Crítico"},
-                {"nivel": 2, "titulo": "🌍 Gobernanza Corporativa", "texto": "La reestructuración exige una auditoría externa (PwC) y la contratación de un gestor privado (PMO) para despolitizar la gestión, requisito clave de los acreedores internacionales.", "dato": "Auditoría: PwC | Gestión: PMO"}
+                {"nivel": 0, "titulo": "🌍 Entorno: Volatilidad", "texto": "El negocio está expuesto al precio internacional del petróleo (WTI) y a la inestabilidad política. Las agencias de rating (S&P, Fitch) nos califican como bono basura ('Junk').", "dato": "Rating: CCC+ / BB+"},
+                {"nivel": 1, "titulo": "🌍 Tipo de Cambio y Caja", "texto": "Existe un descalce estructural: Compramos crudo en Dólares y vendemos en Soles. Cuando el dólar sube (>3.80), necesitamos más soles para pagar la misma deuda.", "dato": "Riesgo FX: Crítico"},
+                {"nivel": 2, "titulo": "🌍 Gobernanza Corporativa", "texto": "La reestructuración exige una auditoría externa (PwC) y la contratación de un gestor privado (PMO) para despolitizar la gestión, requisito clave de acreedores.", "dato": "Auditoría: PwC | Gestión: PMO"}
             ]
         }
 
@@ -177,7 +168,6 @@ class PetrolitoBrain:
 
     def _detectar_intencion(self, prompt):
         prompt = prompt.lower()
-        # Detección ampliada para capturar más intenciones
         if any(x in prompt for x in ["historia", "velasco", "1969", "creacion", "pasado", "antigua", "ipc"]): return "historia"
         if any(x in prompt for x in ["deuda", "bono", "banco", "dinero", "mef", "prestamo", "caja", "liquidez"]): return "deuda"
         if any(x in prompt for x in ["talara", "refineria", "nrt", "flexicoking", "produccion", "operacion", "diesel"]): return "talara"
@@ -188,10 +178,9 @@ class PetrolitoBrain:
         tema = self._detectar_intencion(prompt)
         response_payload = {"texto": "", "adjunto_tipo": None, "adjunto_data": None}
         
-        # Lógica de Continuidad (Si el usuario dice "sigue", "más", etc.)
+        # Lógica de Continuidad
         continuidad = any(x in prompt for x in ["mas", "más", "detalle", "profundiza", "sigue", "continuar"])
         
-        # 1. DETERMINAR SI TENEMOS TEMA O CONTINUIDAD
         nuevo_nivel = 0
         tema_a_usar = None
 
@@ -205,9 +194,9 @@ class PetrolitoBrain:
             else:
                 nuevo_nivel = 0
 
-        # 2. GENERAR RESPUESTA O FALLBACK DIRECTIVO
+        # Lógica de Respuesta
         if tema_a_usar:
-            # --- CASO DE ÉXITO ---
+            # Actualizar memoria
             st.session_state.contexto_chat["tema_actual"] = tema_a_usar
             st.session_state.contexto_chat["nivel_profundidad"] = nuevo_nivel
             
@@ -225,7 +214,7 @@ class PetrolitoBrain:
                 response_payload["texto"] = "⚠️ Error de acceso a datos internos. Por favor reinicie la consulta."
         
         else:
-            # --- FALLBACK AVANZADO: RAZONAMIENTO & GUÍA ---
+            # --- FALLBACK AVANZADO: RAZONAMIENTO & GUÍA (CONSULTOR DIRECTIVO) ---
             response_payload["texto"] = (
                 f"🔎 **Análisis de Consulta:** He procesado su entrada *'{prompt}'*.\n\n"
                 "Aunque detecto su intención de consulta, mis protocolos de **Rigor Financiero** me impiden "
@@ -239,10 +228,10 @@ class PetrolitoBrain:
             
         return response_payload
 
-# Instanciar cerebro
 brain = PetrolitoBrain()
 
-# --- 5. FUNCIONES AUXILIARES VISUALES ---
+# --- 5. FUNCIONES DE DATOS (VISUALES & REPORTES) ---
+# A. GENERADORES DE DASHBOARD Y TALARA
 def get_talara_waterfall():
     return pd.DataFrame({
         'Concepto': ['Presupuesto Inicial', 'Actualización', 'Contrato EPC', 'Auxiliares', 'Intereses', 'Costo Final'],
@@ -271,6 +260,41 @@ def get_rankings():
         'Cambio_Anual': ['+12%', '+5%', '-2%', '+1%', '+4%']
     })
     return costos
+
+# B. GENERADORES DE REPORTES REALES (DATA ROOM)
+def generar_eeff():
+    df = pd.DataFrame({
+        'Concepto': ['Ingresos por Ventas', 'Costo de Ventas', 'UTILIDAD BRUTA', 
+                     'Gastos de Ventas', 'Gastos de Administración', 'Otros Ingresos/Gastos',
+                     'EBITDA', 'Depreciación y Amortización', 'EBIT', 
+                     'Gastos Financieros (Intereses)', 'Diferencia de Cambio', 'UTILIDAD NETA'],
+        '2023 (Auditado MM USD)': [4500.0, -4100.0, 400.0, -150.0, -120.0, 50.0, 
+                                   180.0, -300.0, -120.0, -450.0, -100.0, -670.0],
+        '2024 (Preliminar MM USD)': [5200.0, -4400.0, 800.0, -160.0, -110.0, 40.0, 
+                                     570.0, -320.0, 250.0, -480.0, -50.0, -280.0]
+    })
+    return df
+
+def generar_flujo_caja():
+    df = pd.DataFrame({
+        'Rubro': ['SALDO INICIAL CAJA', '(+) Cobranzas Mercado Local', '(+) Exportaciones', 
+                  '(-) Pago Proveedores Crudo', '(-) Servicio de Deuda', '(-) Planilla y Operaciones', 'SALDO FINAL CAJA'],
+        'Semana 1 (Proy)': [50.0, 85.0, 20.0, -90.0, -10.0, -15.0, 40.0],
+        'Semana 2 (Proy)': [40.0, 90.0, 15.0, -80.0, -25.0, -15.0, 25.0],
+        'Semana 3 (Proy)': [25.0, 80.0, 30.0, -70.0, -10.0, -15.0, 40.0],
+        'Semana 4 (Proy)': [40.0, 95.0, 10.0, -100.0, -5.0, -15.0, 25.0]
+    })
+    return df
+
+def generar_perfil_deuda():
+    df = pd.DataFrame({
+        'Acreedor': ['Bonistas Int. 2032', 'Bonistas Int. 2047', 'CESCE (Sindicado)', 'Banco de la Nación', 'Facilidades Corto Plazo'],
+        'Monto (MM USD)': [1000, 2000, 1300, 800, 2400],
+        'Tasa Interés': ['4.750%', '5.625%', 'Libor + 2.5%', 'Tasa Preferencial', '8.50%'],
+        'Vencimiento': ['2032', '2047', '2030', 'Revolving', '2024-2025'],
+        'Estado': ['Vigente', 'Vigente', 'Periodo de Gracia', 'Vigente', 'Renovación Constante']
+    })
+    return df
 
 def get_csv_download():
     df = get_dashboard_data()
@@ -308,19 +332,16 @@ with st.sidebar:
     
     st.divider()
 
-    # Menú de Navegación Sidebar
+    # Menú de Navegación Sidebar (CON REPORTES)
     if st.button("🏠 HOME"): navegar_a('home')
     if st.button("🏭 TALARA"): navegar_a('talara')
     if st.button("⚡ DASHBOARD"): navegar_a('dashboard')
+    if st.button("📂 REPORTES"): navegar_a('reportes') # NUEVO
     if st.button("🤖 CHAT AI"): navegar_a('chat')
 
     st.markdown("### 🛠️ Ajustes")
     moneda = st.selectbox("Moneda", ["USD ($)", "PEN (S/.)"])
     st.session_state.moneda = moneda
-    unidad = st.selectbox("Escala", ["Millones (MM)", "Miles (k)"])
-
-    csv = get_csv_download()
-    st.download_button("📥 Descargar Reporte", data=csv, file_name='reporte_petroperu.csv', mime='text/csv')
     
     st.write("") 
     st.markdown("### 🌍 Sostenibilidad")
@@ -487,7 +508,84 @@ elif st.session_state.pagina_actual == 'dashboard':
         st.dataframe(df_bancos, use_container_width=True, hide_index=True)
 
 # ==================================================
-# VISTA 4: CHAT (CON SOPORTE MULTIMEDIA & FALLBACK)
+# VISTA 4: REPORTES (DATA ROOM FINANCIERO)
+# ==================================================
+elif st.session_state.pagina_actual == 'reportes':
+    st.title("📂 Data Room Financiero: Archivos Oficiales")
+    st.markdown("Repositorio seguro de Estados Financieros, Flujos de Caja y Estructura de Deuda.")
+    if st.button("⬅ Volver"): navegar_a('home')
+    
+    st.warning("⚠️ **CONFIDENCIAL:** La información contenida en estos archivos es para uso exclusivo de la Gerencia Financiera y Directorio.")
+
+    # Generar DataFrames
+    df_eeff = generar_eeff()
+    df_cash = generar_flujo_caja()
+    df_deuda = generar_perfil_deuda()
+
+    col_rep1, col_rep2, col_rep3 = st.columns(3)
+
+    # --- TARJETA 1: EEFF ---
+    with col_rep1:
+        st.markdown("""
+        <div class="bot-card" style="height: 250px; text-align: center;">
+            <h2 style="color: #00C851 !important;">📊</h2>
+            <h4>Estados Financieros</h4>
+            <p style="font-size: 13px;">Consolidado Auditado 2023 vs Preliminar 2024. Incluye EBITDA y Utilidad Neta.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("**Vista Previa:**")
+        st.dataframe(df_eeff.head(3), hide_index=True, use_container_width=True)
+        
+        csv_eeff = df_eeff.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Descargar EEFF_Consolidado.csv",
+            data=csv_eeff,
+            file_name="Petroperu_EEFF_Consolidado_2024.csv",
+            mime="text/csv"
+        )
+
+    # --- TARJETA 2: CASH FLOW ---
+    with col_rep2:
+        st.markdown("""
+        <div class="bot-card" style="height: 250px; text-align: center;">
+            <h2 style="color: #33b5e5 !important;">💵</h2>
+            <h4>Flujo de Caja (Weekly)</h4>
+            <p style="font-size: 13px;">Proyección de Tesorería a 4 semanas. Detalle de cobranzas y servicio de deuda.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("**Vista Previa:**")
+        st.dataframe(df_cash.head(3), hide_index=True, use_container_width=True)
+
+        csv_cash = df_cash.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Descargar CashFlow_Proyectado.csv",
+            data=csv_cash,
+            file_name="Petroperu_FlujoCaja_Semanal.csv",
+            mime="text/csv"
+        )
+
+    # --- TARJETA 3: DEUDA ---
+    with col_rep3:
+        st.markdown("""
+        <div class="bot-card" style="height: 250px; text-align: center;">
+            <h2 style="color: #ff4444 !important;">📉</h2>
+            <h4>Perfil de Deuda</h4>
+            <p style="font-size: 13px;">Desglose de acreedores (Bonistas, CESCE, Banca), tasas y vencimientos.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("**Vista Previa:**")
+        st.dataframe(df_deuda.head(3), hide_index=True, use_container_width=True)
+
+        csv_deuda = df_deuda.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Descargar Estructura_Deuda.csv",
+            data=csv_deuda,
+            file_name="Petroperu_Perfil_Deuda_2024.csv",
+            mime="text/csv"
+        )
+
+# ==================================================
+# VISTA 5: CHAT (CON SOPORTE MULTIMEDIA & FALLBACK)
 # ==================================================
 elif st.session_state.pagina_actual == 'chat':
     st.title("🤖 Petrolito AI: Análisis & Historia")
