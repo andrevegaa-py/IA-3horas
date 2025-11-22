@@ -84,7 +84,7 @@ with st.sidebar:
     if st.button("🏠 INICIO"): navegar_a('home')
     st.markdown("---")
     st.info("🔹 **Estado:** En Línea")
-    st.caption("v12.0 - Powered by Petrolito AI")
+    st.caption("v12.1 - Powered by Petrolito AI")
 
 # ==================================================
 # VISTA 1: HOME
@@ -173,13 +173,28 @@ elif st.session_state.pagina_actual == 'dashboard':
     st.markdown("---")
     c_risk, c_info = st.columns([1, 2])
     with c_risk:
+        # --- CORRECCIÓN DEL ERROR AQUÍ ---
         fig_gauge = go.Figure(go.Indicator(
-            mode = "gauge+number", value = 35, title = {'text': "Nivel de Estrés Financiero"},
-            gauge = {'axis': {'range': [None, 100]}, 'bar': {'color': "#ff4444"},
-                     'steps': [{'range': [0, 50], 'color': "rgba(0, 255, 0, 0.1)"}, {'range': [80, 100], 'color': "rgba(255, 0, 0, 0.1)"}]},
-            threshold = {'line': {'color': "white", 'width': 4}, 'thickness': 0.75, 'value': 85}))
+            mode = "gauge+number", 
+            value = 35, 
+            title = {'text': "Nivel de Estrés Financiero"},
+            gauge = {
+                'axis': {'range': [0, 100]}, 
+                'bar': {'color': "#ff4444"},
+                'steps': [
+                    {'range': [0, 50], 'color': "rgba(0, 255, 0, 0.1)"}, 
+                    {'range': [80, 100], 'color': "rgba(255, 0, 0, 0.1)"}
+                ],
+                'threshold': { # Ahora threshold está dentro de gauge
+                    'line': {'color': "white", 'width': 4}, 
+                    'thickness': 0.75, 
+                    'value': 85
+                }
+            }
+        ))
         fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='#E2E8F0'), height=250, margin=dict(t=30, b=0))
         st.plotly_chart(fig_gauge, use_container_width=True)
+    
     with c_info:
         st.info("ℹ️ **Petrolito informa:** El nivel de estrés es moderado. Se recomienda vigilar la liquidez.")
 
@@ -241,4 +256,3 @@ elif st.session_state.pagina_actual == 'chat':
             <b>🤝 Socio Estratégico:</b> Te ayuda a entender los números difíciles.
         </div>
         """, unsafe_allow_html=True)
-   
