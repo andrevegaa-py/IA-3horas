@@ -1,179 +1,226 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
 import plotly.graph_objects as go
 import time
 
-# --- CONFIGURACIÓN DE PÁGINA ---
-st.set_page_config(page_title="Petroperú Strategic AI", layout="wide", page_icon="🛢️")
+# --- 1. CONFIGURACIÓN AMIGABLE ---
+st.set_page_config(page_title="Portal Financiero Petroperú", layout="wide", page_icon="🇵🇪")
 
-# --- URLS DE IMÁGENES (Para impacto visual) ---
-IMG_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Petroper%C3%fa_logo.svg/1200px-Petroper%C3%fa_logo.svg.png"
-IMG_REFINERIA = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Refiner%C3%ADa_de_Talara.jpg/1024px-Refiner%C3%ADa_de_Talara.jpg"
-IMG_OPERACIONES = "https://live.staticflickr.com/65535/52668693626_0780566618_b.jpg" # Imagen genérica de industria/oleoducto
+# --- 2. ESTILO CSS (CLEAN & CORPORATE) ---
+# Usamos colores corporativos (Rojo Petroperú y Gris), bordes redondeados y sombras suaves.
+custom_css = """
+<style>
+    /* Importar fuente moderna */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-# --- DATA HISTÓRICA REAL (2014-2024) ---
-def get_historical_context():
-    # Datos aproximados basados en reportes públicos y memoria anual
-    data = {
-        'Año': [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
-        'Deuda_Total_B_USD': [1.2, 3.0, 4.1, 5.2, 5.5, 5.8, 6.2, 6.5, 7.8, 8.2, 8.5],
-        'Utilidad_Neta_M_USD': [150, 480, 220, 180, -50, 120, -220, 100, -280, -800, -650], # Aprox
-        'Hito': [
-            'Inicio PMRT', 'Inversión', 'Emisión Bonos', 'Avance 60%', 'Costos Operativos', 
-            'Pre-Pandemia', 'COVID-19', 'Rebote', 'Crisis Liquidez', 'Rescate MEF', 'Reestructuración'
-        ]
+    html, body, [class*="css"]  {
+        font-family: 'Roboto', sans-serif;
+        background-color: #F5F7F9; /* Fondo gris muy suave */
     }
-    return pd.DataFrame(data)
 
-# --- DATA SIMULADA TIEMPO REAL (Lo que ya tenías) ---
-def get_realtime_data():
-    days = 30
-    dates = pd.date_range(end=pd.Timestamp.now(), periods=days)
-    wti_price = np.random.normal(75, 3, days)
-    cash_flow = (wti_price * 0.8) - 10 + np.random.normal(0, 2, days)
-    df = pd.DataFrame({'Fecha': dates, 'WTI_Price': wti_price, 'Flujo_Caja_M_USD': cash_flow})
-    df['Dia_Index'] = np.arange(len(df))
-    return df
+    /* Estilo de los contenedores (Tarjetas) */
+    .stCard {
+        background-color: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
 
-# --- SIDEBAR ---
+    /* Botones personalizados */
+    .stButton>button {
+        background-color: #CE2029; /* Rojo Petroperú */
+        color: white;
+        border-radius: 8px;
+        border: none;
+        padding: 10px 20px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    .stButton>button:hover {
+        background-color: #A51920;
+        transform: scale(1.02);
+    }
+
+    /* Títulos */
+    h1, h2, h3 {
+        color: #2C3E50;
+    }
+    
+    /* Métricas */
+    [data-testid="stMetricValue"] {
+        color: #CE2029;
+        font-weight: bold;
+    }
+</style>
+"""
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# --- DATOS (BACKEND) ---
+def get_data():
+    # Generamos datos simples para no complicar la demo
+    fechas = pd.date_range(end=pd.Timestamp.now(), periods=30)
+    caja = np.linspace(-50, 20, 30) + np.random.normal(0, 5, 30) # Simula recuperación leve
+    return pd.DataFrame({'Fecha': fechas, 'Caja': caja})
+
+# --- BARRA LATERAL (MENÚ SIMPLE) ---
 with st.sidebar:
-    st.image(IMG_LOGO, width=180)
-    st.markdown("### 🏢 Centro de Comando")
+    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Petroper%C3%fa_logo.svg/1200px-Petroper%C3%fa_logo.svg.png", width=180)
+    st.markdown("### 📌 Menú Principal")
     
-    st.info("Estado: **ALERTA NARANJA**")
-    st.markdown("**Focos de Atención:**")
-    st.caption("🔴 Deuda Estructural PMRT")
-    st.caption("🔴 Liquidez Corto Plazo")
-    st.caption("🟡 Volatilidad Crudo WTI")
-    
-    st.image(IMG_OPERACIONES, caption="Operaciones Oleoducto", use_column_width=True)
-    
-    st.markdown("---")
-    st.write("Sistema v5.0 - Retroalimentado con data histórica 2014-2024.")
-
-# --- TÍTULO E IMAGEN PRINCIPAL ---
-col_header1, col_header2 = st.columns([3, 1])
-with col_header1:
-    st.title("🛢️ Petroperú: Intelligence Monitor")
-    st.markdown("### Análisis Histórico, Proyección y Chatbot Financiero")
-with col_header2:
-    # Mostramos la refinería para impacto visual
-    st.image(IMG_REFINERIA, caption="Nueva Refinería Talara", use_column_width=True)
-
-# --- PESTAÑAS DEL SISTEMA ---
-tab_history, tab_realtime, tab_chat = st.tabs(["📜 Historia (2014-2024)", "⚡ Tiempo Real & IA", "🤖 Asesor Financiero"])
-
-# ==========================================
-# TAB 1: ANÁLISIS HISTÓRICO (LA RETROALIMENTACIÓN)
-# ==========================================
-with tab_history:
-    st.header("Evolución Financiera: La Década Crítica")
-    df_hist = get_historical_context()
-    
-    # Gráfico Mixto: Deuda (Línea) vs Utilidad (Barras)
-    fig_hist = go.Figure()
-    
-    # Barras de Utilidad/Pérdida
-    fig_hist.add_trace(go.Bar(
-        x=df_hist['Año'], 
-        y=df_hist['Utilidad_Neta_M_USD'],
-        name='Utilidad Neta (Millones USD)',
-        marker_color=['green' if x > 0 else 'red' for x in df_hist['Utilidad_Neta_M_USD']]
-    ))
-    
-    # Línea de Deuda
-    fig_hist.add_trace(go.Scatter(
-        x=df_hist['Año'], 
-        y=df_hist['Deuda_Total_B_USD'],
-        name='Deuda Total Acumulada (Billones USD)',
-        yaxis='y2',
-        line=dict(color='black', width=4, dash='dot'),
-        mode='lines+markers'
-    ))
-    
-    fig_hist.update_layout(
-        title="Impacto del PMRT: Escalada de Deuda vs Resultados Netos",
-        yaxis=dict(title="Utilidad/Pérdida (Millones USD)"),
-        yaxis2=dict(title="Deuda Total ($ Billones)", overlaying='y', side='right'),
-        legend=dict(x=0, y=1.1, orientation='h')
+    # Navegación con Radio Button que parece menú
+    opcion = st.radio(
+        "Seleccione una opción:",
+        ["🏠 Inicio", "📊 Ver Gráficos", "💬 Asistente Virtual"],
+        label_visibility="collapsed"
     )
     
-    st.plotly_chart(fig_hist, use_container_width=True)
-    
-    # Tabla de Hitos
-    st.subheader("Hitos Clave Identificados por la IA")
-    st.dataframe(df_hist[['Año', 'Hito', 'Deuda_Total_B_USD']].set_index('Año'), use_container_width=True)
+    st.markdown("---")
+    st.info("💡 **Ayuda:** Si tienes dudas sobre algún término, ve a la sección 'Asistente Virtual'.")
 
-# ==========================================
-# TAB 2: TIEMPO REAL (EL CEREBRO)
-# ==========================================
-with tab_realtime:
-    st.subheader("Monitoreo de Liquidez (Simulación en Vivo)")
-    
-    if st.button('🔄 Sincronizar Datos de Mercado'):
-        df_rt = get_realtime_data()
-        st.session_state.rt_data = df_rt
-        st.success("Conexión establecida.")
-    
-    if 'rt_data' in st.session_state:
-        df = st.session_state.rt_data
-        
-        # Regresión rápida
-        model = LinearRegression()
-        model.fit(df[['Dia_Index']], df['Flujo_Caja_M_USD'])
-        trend = model.coef_[0]
-        
-        col1, col2, col3 = st.columns(3)
-        last_val = df['Flujo_Caja_M_USD'].iloc[-1]
-        
-        col1.metric("Caja Disponible", f"${last_val:.2f} M")
-        col2.metric("Tendencia Corto Plazo", f"{trend:.2f}", delta_color="off")
-        
-        status_color = "green" if trend > 0 else "red"
-        col3.markdown(f"### Estado: :{status_color}[{'Recuperación' if trend > 0 else 'Contracción'}]")
-        
-        # Gráfico simple
-        st.line_chart(df.set_index('Fecha')['Flujo_Caja_M_USD'])
-    else:
-        st.info("Presiona Sincronizar para ver datos en tiempo real.")
+# --- LÓGICA DE PÁGINAS ---
 
-# ==========================================
-# TAB 3: CHATBOT CON MEMORIA HISTÓRICA
-# ==========================================
-with tab_chat:
-    st.markdown("### 💬 Consulta a la Base de Conocimiento (2014-2025)")
+# === PÁGINA 1: BIENVENIDA (HOME) ===
+if "Inicio" in opcion:
+    st.title("👋 ¡Bienvenido al Portal Financiero!")
+    st.markdown("#### Información clara para tomar mejores decisiones.")
     
+    st.markdown("""
+    <div class="stCard">
+        Este sistema te ayuda a visualizar el estado financiero de Petroperú de forma sencilla.
+        No necesitas ser un experto para usarlo.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Tarjetas de acceso rápido (Columnas)
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.image("https://cdn-icons-png.flaticon.com/512/2830/2830323.png", width=80) # Icono gráfico
+        st.subheader("Estado Actual")
+        st.caption("Revisa cómo va la caja y la deuda hoy.")
+    
+    with col2:
+        st.image("https://cdn-icons-png.flaticon.com/512/4712/4712009.png", width=80) # Icono robot
+        st.subheader("Pregúntale a la IA")
+        st.caption("¿Tienes dudas? Nuestro asistente te explica.")
+        
+    with col3:
+        st.image("https://cdn-icons-png.flaticon.com/512/1584/1584892.png", width=80) # Icono alerta
+        st.subheader("Alertas")
+        st.caption("El sistema te avisará si hay riesgos.")
+
+    st.success("✅ **Sistema Operativo:** Todos los servicios están funcionando correctamente.")
+
+# === PÁGINA 2: GRÁFICOS (VISUAL) ===
+elif "Gráficos" in opcion:
+    st.title("📊 Tablero de Control")
+    st.markdown("Aquí puedes ver la evolución del dinero disponible en la empresa.")
+    
+    # Botón grande y claro
+    if st.button("🔄 Actualizar Datos Ahora"):
+        st.toast("¡Datos actualizados con éxito!", icon="✅") # Notificación bonita
+        time.sleep(1)
+
+    df = get_data()
+    ultimo_valor = df['Caja'].iloc[-1]
+
+    # Métricas grandes con explicación (Tooltip)
+    c1, c2 = st.columns(2)
+    c1.metric(
+        label="💰 Dinero en Caja (Millones USD)",
+        value=f"${ultimo_valor:.2f} M",
+        delta="1.5% vs ayer",
+        help="Este es el dinero líquido disponible para pagar deudas hoy."
+    )
+    c2.metric(
+        label="📉 Deuda Talara (Aprox)",
+        value="$8,500 M",
+        delta_color="off",
+        help="Monto total adeudado por la construcción de la refinería."
+    )
+
+    # Gráfico limpio
+    st.subheader("Evolución del último mes")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df['Fecha'], y=df['Caja'],
+        mode='lines+markers',
+        name='Flujo de Caja',
+        line=dict(color='#CE2029', width=3), # Rojo corporativo
+        fill='tozeroy',
+        fillcolor='rgba(206, 32, 41, 0.1)' # Relleno suave
+    ))
+    fig.update_layout(
+        plot_bgcolor='white',
+        hovermode="x unified",
+        margin=dict(l=20, r=20, t=40, b=20),
+        yaxis=dict(gridcolor='#f0f0f0') # Rejilla muy suave
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    with st.expander("Ver explicación del gráfico"):
+        st.write("La línea roja muestra cuánto dinero tenemos. Si baja de 0, significa que estamos usando deuda para operar.")
+
+# === PÁGINA 3: ASISTENTE (CHAT AMIGABLE) ===
+elif "Asistente" in opcion:
+    st.title("💬 Asistente Virtual")
+    st.markdown("Hola, soy tu asistente financiero. No necesitas usar términos complicados, solo pregúntame.")
+
+    # Chat container
+    chat_container = st.container()
+
+    # Historial
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "Tengo acceso a la historia financiera desde 2014 y datos actuales. ¿Pregunta sobre la deuda histórica o la liquidez de hoy?"}]
+        st.session_state.messages = [{"role": "assistant", "content": "¡Hola! ¿En qué puedo ayudarte hoy? Selecciona una opción abajo o escribe tu duda."}]
 
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).write(msg["content"])
+    with chat_container:
+        for msg in st.session_state.messages:
+            # Usamos avatares para que sea más visual
+            avatar = "🧑‍💻" if msg["role"] == "user" else "🤖"
+            st.chat_message(msg["role"], avatar=avatar).write(msg["content"])
 
-    if prompt := st.chat_input("Ej: ¿Por qué subió la deuda en 2017?"):
+    # BOTONES DE PREGUNTAS RÁPIDAS (Para usuarios que no quieren escribir)
+    st.markdown("###### Preguntas frecuentes (Haz clic para preguntar):")
+    col_q1, col_q2, col_q3 = st.columns(3)
+    
+    pregunta_usuario = None
+    
+    if col_q1.button("¿Estamos en crisis?"):
+        pregunta_usuario = "¿Estamos en crisis financiera?"
+    if col_q2.button("Explícame la deuda"):
+        pregunta_usuario = "Explícame la deuda de Talara de forma simple"
+    if col_q3.button("¿Cuánto dinero hay?"):
+        pregunta_usuario = "¿Cuál es el flujo de caja hoy?"
+
+    # Input de texto (por si quieren escribir)
+    input_texto = st.chat_input("O escribe tu pregunta aquí...")
+
+    # Lógica unificada
+    prompt = pregunta_usuario if pregunta_usuario else input_texto
+
+    if prompt:
+        # Mostrar lo que el usuario "dijo"
         st.session_state.messages.append({"role": "user", "content": prompt})
-        st.chat_message("user").write(prompt)
-        
-        prompt_lower = prompt.lower()
-        response = ""
-        
-        # Lógica del Chatbot (Ahora sabe historia)
-        with st.spinner('Consultando memoria histórica...'):
-            time.sleep(1)
-            
-            if "2014" in prompt_lower:
-                response = "En 2014 se marca el inicio fuerte del **PMRT (Proyecto Modernización Refinería Talara)**. La deuda era manejable ($1.2B), pero aquí comenzaron los compromisos de inversión masivos."
-            elif "2017" in prompt_lower or "bonos" in prompt_lower:
-                response = "El 2017 fue clave: Petroperú emitió **bonos corporativos por $2,000 millones** en el mercado internacional para financiar la refinería. Esto disparó la carga de deuda a $5.2 Billones."
-            elif "2020" in prompt_lower or "pandemia" in prompt_lower:
-                response = "El 2020 fue desastroso. La demanda de combustible cayó por el COVID-19, generando pérdidas netas de **$220 millones** y aumentando el estrés de liquidez."
-            elif "2022" in prompt_lower or "crisis" in prompt_lower:
-                response = "En 2022 explotó la **crisis de liquidez**. Hubo problemas con la auditoría de PwC, se rebajó la calificación crediticia y se solicitó el primer rescate fuerte al MEF."
-            elif "deuda" in prompt_lower:
-                response = "La deuda ha crecido exponencialmente: de **$1.2B en 2014** a más de **$8.5B en 2024**. La causa principal es el costo final de la Nueva Refinería de Talara y los intereses acumulados."
-            else:
-                response = "Esa información requiere un análisis más profundo. Basado en la tendencia 2014-2024, sugiero enfocarse en la reestructuración de pasivos de corto plazo. ¿Quieres saber sobre el año 2017 o 2022?"
+        with chat_container:
+            st.chat_message("user", avatar="🧑‍💻").write(prompt)
 
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        st.chat_message("assistant").write(response)
+        # Respuesta amigable
+        resp = ""
+        with st.spinner('Consultando...'):
+            time.sleep(1)
+            p_low = prompt.lower()
+            
+            if "crisis" in p_low:
+                resp = "Actualmente estamos en una situación delicada (Alerta Naranja). Tenemos mucha deuda por pagar, pero la refinería ya está produciendo. Es como tener una hipoteca grande: aprieta, pero tenemos casa nueva."
+            elif "deuda" in p_low:
+                resp = "Imagina que pedimos un préstamo muy grande para construir la nueva refinería. Debemos cerca de $8,500 millones. Ahora tenemos que vender mucho combustible para ir pagando esa tarjeta de crédito gigante."
+            elif "dinero" in p_low or "caja" in p_low:
+                resp = "Hoy tenemos el dinero justo para operar. Estamos vigilando cada gasto para no quedarnos sin efectivo para comprar crudo."
+            else:
+                resp = "Buena pregunta. Básicamente, estamos trabajando para estabilizar la economía de la empresa tras la construcción de Talara. ¿Quieres saber algo más?"
+
+        st.session_state.messages.append({"role": "assistant", "content": resp})
+        with chat_container:
+            st.chat_message("assistant", avatar="🤖").write(resp)
