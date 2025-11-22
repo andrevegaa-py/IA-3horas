@@ -16,7 +16,7 @@ def navegar_a(pagina):
     st.session_state.pagina_actual = pagina
     st.rerun()
 
-# --- 3. ESTILOS CSS (MODO DARK TECH - LETRAS BLANCAS) ---
+# --- 3. ESTILOS CSS (MODO DARK - VISIBILIDAD TOTAL) ---
 estilos_tech = """
 <style>
     /* Fondo Tecnológico */
@@ -27,59 +27,67 @@ estilos_tech = """
     }
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
     
-    /* FORZAR LETRAS BLANCAS */
-    h1, h2, h3, h4, h5, p, li, div, span, label { color: #FFFFFF !important; font-family: 'Segoe UI', sans-serif; }
+    /* --- FUERZA BRUTA: TODO TEXTO A BLANCO --- */
+    h1, h2, h3, h4, h5, h6, p, li, div, span, label, b, i, strong { 
+        color: #FFFFFF !important; 
+        font-family: 'Segoe UI', sans-serif; 
+    }
     
     /* Tarjetas Glassmorphism */
     .glass-card {
         background-color: rgba(30, 41, 59, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 12px;
         padding: 20px;
         backdrop-filter: blur(8px);
         margin-bottom: 15px;
+        color: #FFFFFF !important; /* Asegura texto blanco dentro */
     }
 
     /* Botones */
     .stButton>button {
-        width: 100%; background-color: #0F172A; color: #38BDF8; border: 1px solid #38BDF8;
+        width: 100%; background-color: #0F172A; color: #38BDF8 !important; border: 1px solid #38BDF8;
         border-radius: 6px; padding: 10px; font-weight: 600; text-transform: uppercase; transition: 0.3s;
     }
     .stButton>button:hover {
-        background-color: #38BDF8; color: #0F172A; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        background-color: #38BDF8; color: #0F172A !important; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
     }
     .stButton>button p { color: inherit !important; }
     
-    /* Métricas y Tablas */
+    /* Métricas (Asegurar visibilidad) */
     [data-testid="stMetricValue"] { color: #38BDF8 !important; text-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
-    [data-testid="stMetricLabel"] { color: #E0E0E0 !important; }
-    [data-testid="stMetricDelta"] { color: #E0E0E0 !important; }
+    [data-testid="stMetricLabel"] { color: #FFFFFF !important; font-weight: bold; opacity: 0.9; }
+    [data-testid="stMetricDelta"] { color: #E0E0E0 !important; background-color: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px;}
+    
+    /* Tablas */
     [data-testid="stDataFrame"] { background-color: rgba(0,0,0,0.2); }
+    [data-testid="stDataFrame"] div { color: white !important; }
 </style>
 """
 st.markdown(estilos_tech, unsafe_allow_html=True)
 
-# --- URLS ---
+# --- URLS (IMÁGENES ACTUALIZADAS AQUÍ) ---
 IMG_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Petroper%C3%fa_logo.svg/1200px-Petroper%C3%fa_logo.svg.png"
-IMG_TALARA = "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/07/19/000969550W.jpg" 
 IMG_DASHBOARD = "https://img.freepik.com/free-photo/business-concept-with-graphic-holography_23-2149160929.jpg"
-IMG_ROBOT = "https://img.freepik.com/free-photo/rendering-smart-home-device_23-2151039302.jpg"
 
-# --- FUNCIONES DE DATOS (NUEVAS PARA TALARA) ---
+# NUEVA IMAGEN TALARA (Vista nocturna impresionante)
+IMG_TALARA = "https://i0.wp.com/www.rumbominero.com/wp-content/uploads/2022/04/Refineria-de-Talara.jpg" 
+
+# NUEVA IMAGEN PETROLITO (Asesor Virtual Holográfico)
+IMG_ROBOT = "https://img.freepik.com/free-photo/futuristic-robot-artificial-intelligence-concept_23-2151039287.jpg"
+
+# --- FUNCIONES DE DATOS ---
 def get_talara_waterfall():
-    # Datos explicativos del sobrecosto
     return pd.DataFrame({
-        'Concepto': ['Presupuesto Inicial (2008)', 'Actualización Estudio (2012)', 'Contrato EPC (2014)', 'Unidades Auxiliares', 'Gastos Financieros/Intereses', 'Costo Final Aprox'],
-        'Monto': [1300, 2000, 1000, 800, 3400, 0], # Los saltos
-        'Acumulado': [1300, 3300, 4300, 5100, 8500, 8500],
+        'Concepto': ['Presupuesto Inicial (2008)', 'Actualización (2012)', 'Contrato EPC (2014)', 'Unidades Auxiliares', 'Intereses Finan.', 'Costo Final'],
+        'Monto': [1300, 2000, 1000, 800, 3400, 0],
         'Medida': ["relative", "relative", "relative", "relative", "relative", "total"]
     })
 
 def get_talara_funding():
-    # Estructura de quién puso la plata
     return pd.DataFrame({
-        'Fuente': ['Bonos Corporativos (Deuda)', 'Préstamos Sindicados (CESCE)', 'Aporte Estado (Capital)', 'Recursos Propios'],
-        'Monto_B': [4.3, 1.3, 1.5, 1.4] # Billones aprox
+        'Fuente': ['Bonos Corporativos', 'Préstamos Sindicados', 'Aporte Estado', 'Recursos Propios'],
+        'Monto_B': [4.3, 1.3, 1.5, 1.4]
     })
 
 def get_dashboard_data():
@@ -98,12 +106,17 @@ def get_rankings():
     })
     return costos
 
-# --- HELPER LAYOUT BLANCO ---
+# --- HELPER PARA GRÁFICOS BLANCOS ---
 def layout_blanco(fig, titulo):
     fig.update_layout(
-        title=titulo, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white'), xaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='white'),
-        yaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='white'), legend=dict(font=dict(color='white'))
+        title=dict(text=titulo, font=dict(color='white', size=18)),
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'), # TEXTO GENERAL BLANCO
+        xaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='white', title_font=dict(color='white')),
+        yaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='white', title_font=dict(color='white')),
+        legend=dict(font=dict(color='white')),
+        uniformtext_minsize=10, uniformtext_mode='hide'
     )
     return fig
 
@@ -116,7 +129,7 @@ with st.sidebar:
     if st.button("🏠 INICIO"): navegar_a('home')
     st.markdown("---")
     st.info("🔹 **Estado:** En Línea")
-    st.caption("v14.0 - Deep Dive Talara")
+    st.caption("v14.2 - Visual Upgrade")
 
 # ==================================================
 # VISTA 1: HOME
@@ -142,7 +155,7 @@ if st.session_state.pagina_actual == 'home':
         if st.button("Hablar con Petrolito ➔", key="b3"): navegar_a('chat')
 
 # ==================================================
-# VISTA 2: IMPACTO TALARA (RENOVADA COMPLETAMENTE)
+# VISTA 2: IMPACTO TALARA (CORREGIDO VISIBILIDAD)
 # ==================================================
 elif st.session_state.pagina_actual == 'talara':
     st.title("🏭 Auditoría Visual: Nueva Refinería Talara (PMRT)")
@@ -150,7 +163,7 @@ elif st.session_state.pagina_actual == 'talara':
     with col_head:
         if st.button("⬅ Volver"): navegar_a('home')
     
-    # --- 1. METRICAS DE IMPACTO ---
+    # --- 1. METRICAS ---
     st.markdown("#### 1. El Salto Cuántico del Presupuesto")
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("📅 Inicio de Obra", "2014", "Retraso: 5 años")
@@ -160,7 +173,7 @@ elif st.session_state.pagina_actual == 'talara':
 
     st.markdown("---")
 
-    # --- 2. GRÁFICO DE CASCADA (SOBRECOSTOS) ---
+    # --- 2. CASCADA ---
     c_water, c_info = st.columns([2, 1])
     
     with c_water:
@@ -169,17 +182,17 @@ elif st.session_state.pagina_actual == 'talara':
         
         fig_w = go.Figure(go.Waterfall(
             name = "Costo", orientation = "v",
-            measure = df_w['Medida'],
-            x = df_w['Concepto'],
-            textposition = "outside",
+            measure = df_w['Medida'], x = df_w['Concepto'], y = df_w['Monto'],
             text = ["+1.3", "+2.0", "+1.0", "+0.8", "+3.4", "8.5"],
-            y = df_w['Monto'],
+            textposition = "outside",
             connector = {"line":{"color":"white"}},
             decreasing = {"marker":{"color":"green"}},
-            increasing = {"marker":{"color":"#ff4444"}}, # Rojo para subidas de costo
+            increasing = {"marker":{"color":"#ff4444"}}, 
             totals = {"marker":{"color":"#33b5e5"}}
         ))
         fig_w = layout_blanco(fig_w, "Evolución del Costo Acumulado")
+        # Forzar texto de datos a blanco
+        fig_w.update_traces(textfont_color='white', textfont_size=12)
         st.plotly_chart(fig_w, use_container_width=True)
 
     with c_info:
@@ -194,27 +207,28 @@ elif st.session_state.pagina_actual == 'talara':
         </div>
         """, unsafe_allow_html=True)
 
-    # --- 3. ESTRUCTURA DE FINANCIAMIENTO Y CRONOGRAMA ---
     st.markdown("---")
+
+    # --- 3. PIE CHART Y GANTT ---
     c_pie, c_time = st.columns(2)
     
     with c_pie:
         st.markdown("**🏦 ¿Quién financió esto?**")
         df_f = get_talara_funding()
         fig_p = px.pie(df_f, values='Monto_B', names='Fuente', color_discrete_sequence=px.colors.sequential.RdBu)
-        fig_p.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), showlegend=True)
+        fig_p = layout_blanco(fig_p, "")
+        # Etiquetas Pie Chart blancas
+        fig_p.update_traces(textfont_color='white', textinfo='percent+label')
         st.plotly_chart(fig_p, use_container_width=True)
-        st.caption("Nota: Gran parte de la deuda son Bonos que vencen en 2032 y 2047.")
 
     with c_time:
         st.markdown("**⏳ Cronograma: Planificado vs Real**")
-        # Gráfico de Gantt Simplificado
         df_gantt = pd.DataFrame([
             dict(Task="Plan Original", Start='2014-01-01', Finish='2019-12-31', Color='Plan'),
             dict(Task="Ejecución Real", Start='2014-01-01', Finish='2023-12-31', Color='Real')
         ])
-        fig_g = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Task", color="Color", color_discrete_map={'Plan': 'green', 'Real': 'red'})
-        fig_g.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), title="Desviación de Tiempo (4 años de retraso)")
+        fig_g = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Task", color="Color", color_discrete_map={'Plan': '#00C851', 'Real': '#ff4444'})
+        fig_g = layout_blanco(fig_g, "Desviación de Tiempo (4 años de retraso)")
         st.plotly_chart(fig_g, use_container_width=True)
 
 # ==================================================
@@ -255,7 +269,7 @@ elif st.session_state.pagina_actual == 'dashboard':
         fig_rank.add_trace(go.Bar(
             y=df_rank['Unidad'], x=df_rank['Gasto_M'], orientation='h',
             marker_color=['#ff4444', '#ffbb33', '#00C851', '#33b5e5', '#aa66cc'],
-            text=df_rank['Cambio_Anual'], textposition='auto'
+            text=df_rank['Cambio_Anual'], textposition='auto', textfont_color='white'
         ))
         fig_rank = layout_blanco(fig_rank, "Top 5 Gastos (Millones $)")
         fig_rank.update_layout(height=400, margin=dict(l=10, r=10, t=40, b=10))
