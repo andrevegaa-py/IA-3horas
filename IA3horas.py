@@ -23,14 +23,13 @@ if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant", 
         "content": (
-            "Bienvenido al Hub de Inteligencia. Soy Petrolito 3.0.\n\n"
-            "He sido actualizado con capacidades de **Análisis Histórico** y **Generación de Gráficos**.\n"
-            "Puedo asistirle en:\n"
+            "Bienvenido al Hub de Inteligencia. Soy Petrolito 4.0.\n\n"
+            "Estoy configurado con protocolos de **Rigor Financiero**. Puedo analizar data histórica, proyecciones de deuda y operaciones técnicas.\n"
             "• **Historia** (Evolución y Producción)\n"
             "• **Deuda** (Bonos y Estrategia)\n"
             "• **Talara** (Operaciones y Flexicoking)\n"
             "• **Macro** (Riesgo País y WTI)\n\n"
-            "¿Por dónde desea comenzar?"
+            "¿Cuál es su consulta estratégica?"
         )
     }]
 
@@ -116,113 +115,128 @@ IMG_CARD_TALARA = "https://portal.andina.pe/EDPfotografia3/Thumbnail/2022/04/12/
 IMG_CARD_FINANCE = "https://img.freepik.com/free-photo/standard-quality-control-collage-concept_23-2149595831.jpg"
 IMG_CARD_AI = "https://img.freepik.com/free-photo/rpa-concept-with-blurry-hand-touching-screen_23-2149311914.jpg"
 
-# --- 4. CEREBRO FINANCIERO 3.0 (CLASE COMPLETA) ---
+# --- 4. CEREBRO FINANCIERO 4.0 (MODO CONSULTOR) ---
 
 class PetrolitoBrain:
     def __init__(self):
         self.USE_LIVE_API = False 
         
-        # BASE DE CONOCIMIENTO AMPLIADA (Finanzas + Historia)
+        # BASE DE CONOCIMIENTO (Finanzas + Historia + Técnica)
         self.knowledge_base = {
             "historia": [
                 {
                     "nivel": 0,
                     "titulo": "📜 Historia: Origen y Misión",
-                    "texto": "Petroperú fue creada el **24 de julio de 1969** (Ley 17753) tras la expropiación de los activos de la *International Petroleum Company* (IPC) en Talara. Su misión fundacional fue asegurar la soberanía energética del país, integrando verticalmente la exploración, refinación y distribución.",
-                    "dato": "Fundación: 1969 (Gob. Velasco) | Activo Base: Talara",
-                    "adjunto": "grafico_historia" # Trigger para gráfico
+                    "texto": "Petroperú nació el **24 de julio de 1969** tras la nacionalización de la *International Petroleum Company* en Talara. Su mandato original fue garantizar la seguridad energética nacional, controlando toda la cadena desde el pozo hasta el grifo.",
+                    "dato": "Origen: 1969 (Velasco) | Activo: Talara",
+                    "adjunto": "grafico_historia"
                 },
                 {
                     "nivel": 1,
-                    "titulo": "📜 Historia: La Privatización (Años 90)",
-                    "texto": "En los 90, bajo una política de libre mercado, Petroperú fue fragmentada. Se privatizaron activos clave: La Flota Petrolera (Transoceánica), la Planta de Gas (Solgas), grifos propios y refinerías menores (La Pampilla). La empresa perdió su integración vertical y se quedó solo con refinación y transporte (Oleoducto).",
-                    "dato": "Pérdida: Grifos y Pozos | Enfoque: Solo Refino"
+                    "titulo": "📜 Historia: La Fragmentación (Años 90)",
+                    "texto": "En los 90 se privatizaron unidades rentables: la flota naviera, la planta de gas (Solgas) y refinerías satélites. La empresa perdió integración vertical, quedándose principalmente con el negocio de refinación (bajo margen) y transporte (Oleoducto).",
+                    "dato": "Privatizado: Solgas, Naviera, Grifos"
                 },
                 {
                     "nivel": 2,
-                    "titulo": "📜 Historia: Retorno al Upstream y Ley 30130",
-                    "texto": "En 2013 se promulga la **Ley 30130**, que declara de necesidad pública la Modernización de Talara, pero prohíbe inversiones en otros rubros si generan deuda. Recientemente, Petroperú ha retornado al 'Upstream' (Explotación) operando temporalmente los Lotes I, VI y Z-69 en Talara, buscando recuperar la integración vertical.",
-                    "dato": "Ley 30130: Candado Financiero | Lotes actuales: I, VI, Z-69"
+                    "titulo": "📜 Historia: Ley 30130 y Retorno",
+                    "texto": "La Ley 30130 (2013) blindó la construcción de la Nueva Refinería Talara pero restringió nuevas inversiones. Hoy, la estrategia es volver al *Upstream* (Lotes I, VI, Z-69) para producir crudo propio y reducir el costo de la materia prima en Talara.",
+                    "dato": "Hito: Retorno al Upstream (Lotes I, VI)"
                 }
             ],
             "deuda": [
-                {"nivel": 0, "titulo": "📉 Deuda: Visión General", "texto": "La deuda financiera total es de **USD 8.5 Billones**. Dependemos de líneas garantizadas por el MEF. El flujo de caja operativo es insuficiente para el servicio de deuda corto plazo.", "dato": "Deuda: $8.5B", "adjunto": "tabla_deuda"},
-                {"nivel": 1, "titulo": "📉 Composición de Pasivos", "texto": "45% Bonos Corporativos y 30% Facilidad CESCE (España). Presión crítica en capital de trabajo (Revolving).", "dato": "Bonos: $3.0B"},
-                {"nivel": 2, "titulo": "📉 Covenants y Yield", "texto": "Yield de bonos 2047 supera el 11%. Se negocian 'Waivers' por incumplimiento de ratios de liquidez.", "dato": "Yield: >11%"}
+                {"nivel": 0, "titulo": "📉 Deuda: Situación Crítica", "texto": "La deuda total es de **USD 8.5 Billones**. La estructura de capital es insostenible sin apoyo estatal. Actualmente, el MEF otorga garantías para evitar el impago de combustibles importados.", "dato": "Pasivo Total: $8.5B", "adjunto": "tabla_deuda"},
+                {"nivel": 1, "titulo": "📉 Estructura de Pasivos", "texto": "El problema no es solo el monto, sino el plazo. Tenemos **$3,000 MM** en Bonos a largo plazo y **$1,300 MM** del crédito sindicado CESCE. Lo urgente es la deuda de corto plazo (capital de trabajo) que asfixia la caja.", "dato": "Bonos: $3.0B | CESCE: $1.3B"},
+                {"nivel": 2, "titulo": "📉 Riesgo de Liquidez y Yield", "texto": "Los bonos de Petroperú cotizan con un rendimiento (Yield) superior al 11%, reflejando alto riesgo de impago. Estamos en constante negociación ('Waivers') con la banca por incumplir ratios financieros (Deuda/EBITDA).", "dato": "Yield Mercado: >11%"}
             ],
             "talara": [
-                {"nivel": 0, "titulo": "🏭 NRT: Status Operativo", "texto": "Refinería al 100%. Procesa 95k barriles/día. Ya no es proyecto, es activo productivo Euro VI.", "dato": "Capacidad: 95 KBPD"},
-                {"nivel": 1, "titulo": "🏭 Márgenes y Flexicoking", "texto": "El margen objetivo es $10-12/bbl gracias a la unidad de Flexicoking que convierte residuales en destilados valiosos.", "dato": "Margen: $10-12"},
-                {"nivel": 2, "titulo": "🏭 Tecnología ExxonMobil", "texto": "La licencia de Flexicoking permite procesar crudos pesados generando gas de síntesis para autogeneración eléctrica.", "dato": "Licencia: Exxon"}
+                {"nivel": 0, "titulo": "🏭 NRT: Operación Plena", "texto": "La Nueva Refinería Talara opera al 100% de capacidad (**95 KBPD**). Produce diésel y gasolinas Euro VI (menos de 50 ppm de azufre), cumpliendo la normativa ambiental vigente.", "dato": "Capacidad: 95,000 BPD"},
+                {"nivel": 1, "titulo": "🏭 Margen de Refino", "texto": "La rentabilidad depende del diferencial de precios (Crack Spread). Con la tecnología actual, buscamos un margen de **$10 a $12 por barril**, superior a los $4 de la refinería antigua.", "dato": "Target Margen: $10-12/bbl"},
+                {"nivel": 2, "titulo": "🏭 Flexicoking: El Corazón Técnico", "texto": "La unidad de **Flexicoking** (licencia ExxonMobil) es la joya técnica. Convierte lo más barato (residuo de vacío) en productos caros y genera gas para que la refinería se autoabastezca de energía, reduciendo costos.", "dato": "Tecnología: Conversión Profunda"}
             ],
             "macro": [
-                {"nivel": 0, "titulo": "🌍 Riesgo y Entorno", "texto": "Entorno volátil. Variables clave: WTI y soporte del Estado. Calificación crediticia en terreno especulativo.", "dato": "Rating: Junk"},
-                {"nivel": 1, "titulo": "🌍 Mismatch de Monedas", "texto": "Ingresos en Soles vs Deuda en Dólares. Tipo de cambio >3.80 afecta gravemente la caja.", "dato": "Riesgo FX: Alto"},
-                {"nivel": 2, "titulo": "🌍 Gobernanza", "texto": "Exigencia de acreedores: Auditoría externa (PwC) y reestructuración con gestor privado (PMO).", "dato": "Auditor: PwC"}
+                {"nivel": 0, "titulo": "🌍 Entorno: Volatilidad", "texto": "El negocio está expuesto al precio internacional del petróleo (WTI) y a la inestabilidad política. Las agencias de rating (S&P, Fitch) nos califican como bono basura ('Junk') debido a la debilidad financiera.", "dato": "Rating: CCC+ / BB+"},
+                {"nivel": 1, "titulo": "🌍 Tipo de Cambio y Caja", "texto": "Existe un descalce estructural: Compramos crudo en Dólares y vendemos en Soles. Cuando el dólar sube (>3.80), necesitamos más soles para pagar la misma deuda, lo que drena la liquidez.", "dato": "Riesgo FX: Crítico"},
+                {"nivel": 2, "titulo": "🌍 Gobernanza Corporativa", "texto": "La reestructuración exige una auditoría externa (PwC) y la contratación de un gestor privado (PMO) para despolitizar la gestión, requisito clave de los acreedores internacionales.", "dato": "Auditoría: PwC | Gestión: PMO"}
             ]
         }
 
     def _generar_grafico_produccion(self):
-        """Genera un gráfico histórico de producción para el chat"""
         years = [1980, 1990, 2000, 2010, 2020, 2024]
-        prod = [180, 120, 40, 45, 35, 95] # Miles de barriles (aprox)
+        prod = [180, 120, 40, 45, 35, 95]
         fig = go.Figure(data=go.Scatter(x=years, y=prod, mode='lines+markers', line=dict(color='#00C851', width=3)))
         fig.update_layout(title="Producción Histórica (Miles BPD)", template="plotly_dark", height=250, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
         return fig
 
     def _generar_tabla_deuda(self):
-        """Genera dataframe para descarga"""
         return pd.DataFrame({
-            "Instrumento": ["Bonos 2032", "Bonos 2047", "CESCE", "Banca Local"],
+            "Instrumento": ["Bonos 2032", "Bonos 2047", "CESCE (España)", "Banca Local"],
             "Monto_MM": [1000, 2000, 1300, 500],
-            "Tasa": ["4.75%", "5.625%", "Variable", "8.00%"]
+            "Tasa": ["4.75%", "5.625%", "Variable+2%", "8.50%"]
         })
 
     def _detectar_intencion(self, prompt):
         prompt = prompt.lower()
-        if any(x in prompt for x in ["historia", "velasco", "1969", "creacion", "pasado", "privatiza", "ipc"]): return "historia"
-        if any(x in prompt for x in ["deuda", "bono", "banco", "dinero", "mef"]): return "deuda"
-        if any(x in prompt for x in ["talara", "refineria", "nrt", "flexicoking"]): return "talara"
-        if any(x in prompt for x in ["macro", "dolar", "wti", "precio"]): return "macro"
+        # Detección ampliada para capturar más intenciones
+        if any(x in prompt for x in ["historia", "velasco", "1969", "creacion", "pasado", "antigua", "ipc"]): return "historia"
+        if any(x in prompt for x in ["deuda", "bono", "banco", "dinero", "mef", "prestamo", "caja", "liquidez"]): return "deuda"
+        if any(x in prompt for x in ["talara", "refineria", "nrt", "flexicoking", "produccion", "operacion", "diesel"]): return "talara"
+        if any(x in prompt for x in ["macro", "dolar", "wti", "precio", "riesgo", "mercado", "gobierno"]): return "macro"
         return None
 
     def procesar_consulta(self, prompt, estado_actual):
         tema = self._detectar_intencion(prompt)
         response_payload = {"texto": "", "adjunto_tipo": None, "adjunto_data": None}
-
-        # Lógica de Profundidad
+        
+        # Lógica de Continuidad (Si el usuario dice "sigue", "más", etc.)
+        continuidad = any(x in prompt for x in ["mas", "más", "detalle", "profundiza", "sigue", "continuar"])
+        
+        # 1. DETERMINAR SI TENEMOS TEMA O CONTINUIDAD
         nuevo_nivel = 0
-        if any(x in prompt for x in ["mas", "más", "detalle", "profundiza"]):
-            tema = estado_actual["tema_actual"]
-            if tema: nuevo_nivel = min(estado_actual["nivel_profundidad"] + 1, 2)
+        tema_a_usar = None
+
+        if continuidad and estado_actual["tema_actual"]:
+            tema_a_usar = estado_actual["tema_actual"]
+            nuevo_nivel = min(estado_actual["nivel_profundidad"] + 1, 2)
         elif tema:
+            tema_a_usar = tema
             if estado_actual["tema_actual"] == tema:
                 nuevo_nivel = min(estado_actual["nivel_profundidad"] + 1, 2)
-        else:
-            response_payload["texto"] = "No entiendo el contexto. Pruebe: 'Historia de la empresa', 'Situación de Deuda' o 'Refinería Talara'."
-            return response_payload
+            else:
+                nuevo_nivel = 0
 
-        # Actualizar Estado
-        st.session_state.contexto_chat["tema_actual"] = tema
-        st.session_state.contexto_chat["nivel_profundidad"] = nuevo_nivel
-
-        # Construir Respuesta
-        try:
-            data = self.knowledge_base[tema][nuevo_nivel]
-            response_payload["texto"] = f"### {data['titulo']}\n\n{data['texto']}\n\n**Dato Clave:** {data['dato']}"
+        # 2. GENERAR RESPUESTA O FALLBACK DIRECTIVO
+        if tema_a_usar:
+            # --- CASO DE ÉXITO ---
+            st.session_state.contexto_chat["tema_actual"] = tema_a_usar
+            st.session_state.contexto_chat["nivel_profundidad"] = nuevo_nivel
             
-            # GESTIÓN DE ADJUNTOS (INTELIGENCIA MULTIMEDIA)
-            if "adjunto" in data:
-                if data["adjunto"] == "grafico_historia":
-                    response_payload["adjunto_tipo"] = "grafico"
-                    response_payload["adjunto_data"] = self._generar_grafico_produccion()
-                elif data["adjunto"] == "tabla_deuda":
-                    response_payload["adjunto_tipo"] = "dataframe"
-                    response_payload["adjunto_data"] = self._generar_tabla_deuda()
-                    
-        except:
-            response_payload["texto"] = "Información no disponible para este nivel."
-
+            try:
+                data = self.knowledge_base[tema_a_usar][nuevo_nivel]
+                response_payload["texto"] = f"### {data['titulo']}\n\n{data['texto']}\n\n**Dato Clave:** {data['dato']}"
+                if "adjunto" in data:
+                    if data["adjunto"] == "grafico_historia":
+                        response_payload["adjunto_tipo"] = "grafico"
+                        response_payload["adjunto_data"] = self._generar_grafico_produccion()
+                    elif data["adjunto"] == "tabla_deuda":
+                        response_payload["adjunto_tipo"] = "dataframe"
+                        response_payload["adjunto_data"] = self._generar_tabla_deuda()
+            except:
+                response_payload["texto"] = "⚠️ Error de acceso a datos internos. Por favor reinicie la consulta."
+        
+        else:
+            # --- FALLBACK AVANZADO: RAZONAMIENTO & GUÍA ---
+            response_payload["texto"] = (
+                f"🔎 **Análisis de Consulta:** He procesado su entrada *'{prompt}'*.\n\n"
+                "Aunque detecto su intención de consulta, mis protocolos de **Rigor Financiero** me impiden "
+                "especular sobre temas que no han sido auditados o que salen de mi base vectorial autorizada.\n\n"
+                "**Como Asistente Estratégico, le sugiero redirigir el análisis a estos ejes críticos:**\n\n"
+                "1.  💵 **Salud Financiera:** Pregunte por *'Deuda'*, *'Bonos'* o *'Liquidez'*.\n"
+                "2.  🏭 **Operaciones:** Consulte sobre *'Talara'*, *'Producción'* o *'Flexicoking'*.\n"
+                "3.  📜 **Contexto:** Explore la *'Historia'* de la empresa o el *'Riesgo País'*.\n\n"
+                "👉 *Por favor, seleccione uno de estos vectores para desplegar la información oficial.*"
+            )
+            
         return response_payload
 
 # Instanciar cerebro
@@ -473,7 +487,7 @@ elif st.session_state.pagina_actual == 'dashboard':
         st.dataframe(df_bancos, use_container_width=True, hide_index=True)
 
 # ==================================================
-# VISTA 4: CHAT (CON SOPORTE MULTIMEDIA)
+# VISTA 4: CHAT (CON SOPORTE MULTIMEDIA & FALLBACK)
 # ==================================================
 elif st.session_state.pagina_actual == 'chat':
     st.title("🤖 Petrolito AI: Análisis & Historia")
