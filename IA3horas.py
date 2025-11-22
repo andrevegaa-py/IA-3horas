@@ -18,38 +18,32 @@ def navegar_a(pagina):
     st.session_state.pagina_actual = pagina
     st.rerun()
 
-# --- 3. ESTILOS CSS (FONDO UNIFICADO + SIDEBAR INTEGRADO) ---
+# --- 3. ESTILOS CSS (VISUAL IMPACT) ---
 estilos_tech = """
 <style>
-    /* 1. FONDO GENERAL (GLOBAL) */
+    /* 1. FONDO GENERAL */
     [data-testid="stAppViewContainer"] {
-        background-image: linear-gradient(rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.98)), 
+        background-image: linear-gradient(rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.96)), 
                           url("https://img.freepik.com/free-vector/abstract-technology-background-with-connecting-dots-lines_1048-12334.jpg");
         background-size: cover; background-position: center; background-attachment: fixed;
     }
     [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
 
-    /* 2. SIDEBAR INTEGRADO (MISMO FONDO + EFECTO VIDRIO) */
+    /* 2. SIDEBAR (IMPACTO VISUAL) */
     [data-testid="stSidebar"] {
-        background-image: linear-gradient(rgba(11, 17, 32, 0.98), rgba(11, 17, 32, 0.95)); /* Un poco más oscuro para contraste */
-        border-right: 1px solid rgba(56, 189, 248, 0.15);
+        background-color: #0B1120;
+        border-right: 1px solid rgba(56, 189, 248, 0.2);
     }
     
-    /* 3. TEXTO BLANCO UNIVERSAL */
+    /* 3. TEXTOS BLANCOS */
     h1, h2, h3, h4, h5, h6, p, li, div, span, label, b, i, strong, small { 
-        color: #FFFFFF !important; 
-        font-family: 'Segoe UI', sans-serif; 
+        color: #FFFFFF !important; font-family: 'Segoe UI', sans-serif; 
     }
     
-    /* 4. WIDGETS DEL SIDEBAR (Selectbox, Radio) */
+    /* 4. ELEMENTOS DE UI */
     .stSelectbox div[data-baseweb="select"] > div {
-        background-color: #1E293B !important;
-        color: white !important;
-        border: 1px solid #38BDF8;
+        background-color: #1E293B !important; color: white !important; border: 1px solid #38BDF8;
     }
-    .stSelectbox label { font-size: 14px; font-weight: bold; color: #38BDF8 !important; }
-
-    /* 5. TARJETAS & BOTONES */
     .glass-card {
         background-color: rgba(30, 41, 59, 0.6);
         border: 1px solid rgba(255, 255, 255, 0.2);
@@ -65,33 +59,40 @@ estilos_tech = """
         background-color: #38BDF8; color: #0F172A !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
     }
 
-    /* 6. AJUSTES VISUALES */
+    /* 5. IMÁGENES REDONDEADAS */
+    img { border-radius: 8px; }
+    
+    /* 6. AJUSTES METRICAS */
     [data-testid="stMetricValue"] { color: #38BDF8 !important; text-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
     [data-testid="stMetricLabel"] { color: #FFFFFF !important; opacity: 0.9; }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #0F172A; }
-    ::-webkit-scrollbar-thumb { background: #38BDF8; border-radius: 4px; }
 </style>
 """
 st.markdown(estilos_tech, unsafe_allow_html=True)
 
-# --- URLS ---
+# --- URLS DE IMÁGENES DE ALTO IMPACTO ---
+# Logo oficial
 IMG_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Petroper%C3%fa_logo.svg/1200px-Petroper%C3%fa_logo.svg.png"
-IMG_DASHBOARD = "https://img.freepik.com/free-photo/business-concept-with-graphic-holography_23-2149160929.jpg"
-IMG_TALARA = "https://i0.wp.com/www.rumbominero.com/wp-content/uploads/2022/04/Refineria-de-Talara.jpg" 
-IMG_ROBOT = "https://img.freepik.com/free-photo/futuristic-robot-artificial-intelligence-concept_23-2151039287.jpg"
+# Avatar 3D para el usuario (Gerente)
+IMG_USER = "https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg"
+# Banner para el sidebar (relleno visual)
+IMG_SIDEBAR_BANNER = "https://img.freepik.com/free-photo/oil-refinery-twilight_1112-575.jpg"
+
+# Tarjetas Principales (Home)
+IMG_CARD_TALARA = "https://portal.andina.pe/EDPfotografia3/Thumbnail/2022/04/12/000862854W.jpg" # Foto real Talara Noche
+IMG_CARD_FINANCE = "https://img.freepik.com/free-photo/standard-quality-control-collage-concept_23-2149595831.jpg" # Abstracto Finanzas
+IMG_CARD_AI = "https://img.freepik.com/free-photo/rpa-concept-with-blurry-hand-touching-screen_23-2149311914.jpg" # Mano robotica
 
 # --- FUNCIONES DE DATOS ---
 def get_talara_waterfall():
     return pd.DataFrame({
-        'Concepto': ['Presupuesto Inicial (2008)', 'Actualización (2012)', 'Contrato EPC (2014)', 'Unidades Auxiliares', 'Intereses Finan.', 'Costo Final'],
+        'Concepto': ['Presupuesto Inicial', 'Actualización', 'Contrato EPC', 'Auxiliares', 'Intereses', 'Costo Final'],
         'Monto': [1300, 2000, 1000, 800, 3400, 0],
         'Medida': ["relative", "relative", "relative", "relative", "relative", "total"]
     })
 
 def get_talara_funding():
     return pd.DataFrame({
-        'Fuente': ['Bonos Corporativos', 'Préstamos Sindicados', 'Aporte Estado', 'Recursos Propios'],
+        'Fuente': ['Bonos Corp.', 'Préstamos', 'Estado', 'Propios'],
         'Monto_B': [4.3, 1.3, 1.5, 1.4]
     })
 
@@ -112,7 +113,6 @@ def get_rankings():
     return costos
 
 def get_csv_download():
-    # Simulamos un CSV para descargar
     df = get_dashboard_data()
     return df.to_csv(index=False).encode('utf-8')
 
@@ -130,135 +130,127 @@ def layout_blanco(fig, titulo):
     return fig
 
 # ==================================================
-# BARRA LATERAL (AHORA CON FUNCIONES REALES)
+# BARRA LATERAL (VISUALMENTE RICA)
 # ==================================================
 with st.sidebar:
-    # 1. Logo Corporativo
-    st.markdown(f"<div style='background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);'><img src='{IMG_LOGO}' width='100%'></div>", unsafe_allow_html=True)
-    st.write("")
+    # 1. Logo sobre tarjeta blanca
+    st.markdown(f"<div style='background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); margin-bottom: 20px;'><img src='{IMG_LOGO}' width='100%'></div>", unsafe_allow_html=True)
 
-    # 2. Perfil de Usuario
-    st.markdown("""
-    <div style='display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;'>
-        <div style='background: #38BDF8; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #0F172A;'>GF</div>
-        <div>
-            <div style='color: white; font-weight: bold; font-size: 14px;'>Gerencia Finanzas</div>
-            <div style='color: #38BDF8; font-size: 11px;'>● Conectado</div>
+    # 2. Perfil de Usuario (CON IMAGEN REAL)
+    st.markdown("### 👤 Usuario Conectado")
+    c_prof1, c_prof2 = st.columns([1, 3])
+    with c_prof1:
+        # Avatar circular
+        st.markdown(f"<img src='{IMG_USER}' style='width: 60px; height: 60px; border-radius: 50%; border: 2px solid #38BDF8;'>", unsafe_allow_html=True)
+    with c_prof2:
+        st.markdown("""
+        <div style='padding-left: 5px;'>
+            <div style='color: white; font-weight: bold; font-size: 16px;'>Admin Finanzas</div>
+            <div style='color: #00C851; font-size: 12px; font-weight: bold;'>● En Línea</div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+    
+    st.divider()
 
-    # 3. Navegación Principal
-    st.markdown("### 🧭 Navegación")
+    # 3. Menú de Navegación
     if st.button("🏠 DASHBOARD PRINCIPAL"): navegar_a('home')
 
-    st.divider()
-
-    # 4. Herramientas de Control (NUEVO)
-    st.markdown("### 🛠️ Configuración")
-    
-    moneda = st.selectbox("Moneda de Visualización", ["USD ($)", "PEN (S/.)"], index=0)
+    # 4. Herramientas
+    st.markdown("### 🛠️ Herramientas")
+    moneda = st.selectbox("Moneda", ["USD ($)", "PEN (S/.)"])
     st.session_state.moneda = moneda
-    
-    unidad = st.selectbox("Unidad de Medida", ["Millones (MM)", "Miles (k)"], index=0)
-    
-    st.divider()
+    unidad = st.selectbox("Escala", ["Millones (MM)", "Miles (k)"])
 
-    # 5. Zona de Descargas (NUEVO)
-    st.markdown("### 📥 Reportes")
+    # 5. Descarga
     csv = get_csv_download()
-    st.download_button(
-        label="📄 Descargar Data (CSV)",
-        data=csv,
-        file_name='reporte_financiero_petroperu.csv',
-        mime='text/csv',
-    )
+    st.download_button("📥 Descargar Reporte", data=csv, file_name='reporte.csv', mime='text/csv')
     
-    st.markdown("---")
-    # Footer del sistema
-    st.markdown(f"<div style='text-align: center; color: #64748B; font-size: 12px;'>System v16.0<br>Secure Connection 🔒</div>", unsafe_allow_html=True)
+    st.write("") # Espacio
+    
+    # 6. BANNER INFORMATIVO (Para llenar espacio visualmente)
+    st.markdown("### 🌍 Sostenibilidad")
+    st.image(IMG_SIDEBAR_BANNER, caption="Operaciones Talara - Turno Noche", use_column_width=True)
+    st.caption("Monitoreo ambiental activo: ✅ Normal")
 
 # ==================================================
-# VISTA 1: HOME
+# VISTA 1: HOME (TARJETAS VISUALES)
 # ==================================================
 if st.session_state.pagina_actual == 'home':
     st.title("🚀 Petroperú: Plataforma de Inteligencia Financiera")
-    st.markdown("#### Seleccione un módulo para iniciar el análisis:")
+    st.markdown("#### Seleccione un módulo estratégico:")
     st.write("") 
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.image(IMG_TALARA, use_column_width=True)
+    # Tarjetas con IMÁGENES COMPLETAS
+    c1, c2, c3 = st.columns(3)
+    
+    with c1:
+        # Usamos HTML/Markdown para controlar mejor el tamaño de imagen si es necesario, o st.image directo
+        st.image(IMG_CARD_TALARA, use_column_width=True)
         st.markdown("### 🏭 Historia de Talara")
-        if st.button("Ver Auditoría ➔", key="b1"): navegar_a('talara')
-    with col2:
-        st.image(IMG_DASHBOARD, use_column_width=True)
+        st.info("Auditoría de deuda y construcción.")
+        if st.button("Acceder ➔", key="b1"): navegar_a('talara')
+
+    with c2:
+        st.image(IMG_CARD_FINANCE, use_column_width=True)
         st.markdown("### ⚡ Monitor Financiero")
-        if st.button("Ver Dashboard ➔", key="b2"): navegar_a('dashboard')
-    with col3:
-        st.image(IMG_ROBOT, use_column_width=True)
+        st.info("KPIs de liquidez y EBITDA en vivo.")
+        if st.button("Acceder ➔", key="b2"): navegar_a('dashboard')
+
+    with c3:
+        st.image(IMG_CARD_AI, use_column_width=True)
         st.markdown("### 🤖 Petrolito AI")
-        st.caption("Tu nuevo compañero financiero inteligente.")
-        if st.button("Hablar con Petrolito ➔", key="b3"): navegar_a('chat')
+        st.info("Tu analista virtual 24/7.")
+        if st.button("Consultar ➔", key="b3"): navegar_a('chat')
 
 # ==================================================
-# VISTA 2: IMPACTO TALARA
+# VISTA 2: TALARA
 # ==================================================
 elif st.session_state.pagina_actual == 'talara':
-    st.title("🏭 Auditoría Visual: Nueva Refinería Talara (PMRT)")
+    st.title("🏭 Auditoría Visual: Nueva Refinería Talara")
     col_head, _ = st.columns([1, 5])
     with col_head:
         if st.button("⬅ Volver"): navegar_a('home')
     
-    # --- 1. METRICAS ---
+    # Métricas
     st.markdown("#### 1. El Salto Cuántico del Presupuesto")
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("📅 Inicio de Obra", "2014", "Retraso: 5 años")
-    m2.metric("💰 Presupuesto Inicial", "$1.3 B", "Estimado 2008")
-    m3.metric("💸 Costo Final + Intereses", "$8.5 B", "+553% vs Inicial", delta_color="inverse")
-    m4.metric("📉 Rentabilidad (TIR)", "2.8%", "Baja Rentabilidad")
+    m1.metric("📅 Inicio", "2014", "5 años retraso")
+    m2.metric("💰 Presupuesto", "$1.3 B", "2008")
+    m3.metric("💸 Costo Final", "$8.5 B", "+553%", delta_color="inverse")
+    m4.metric("📉 TIR", "2.8%", "Crítico")
 
     st.markdown("---")
-
-    # --- 2. CASCADA ---
     c_water, c_info = st.columns([2, 1])
     
     with c_water:
-        st.markdown("**🔍 Anatomía del Sobrecosto (Billones USD)**")
+        st.markdown("**🔍 Anatomía del Sobrecosto**")
         df_w = get_talara_waterfall()
         fig_w = go.Figure(go.Waterfall(
-            name = "Costo", orientation = "v",
-            measure = df_w['Medida'], x = df_w['Concepto'], y = df_w['Monto'],
-            text = ["+1.3", "+2.0", "+1.0", "+0.8", "+3.4", "8.5"],
-            textposition = "outside",
-            connector = {"line":{"color":"white"}},
-            decreasing = {"marker":{"color":"green"}},
-            increasing = {"marker":{"color":"#ff4444"}}, 
-            totals = {"marker":{"color":"#33b5e5"}}
+            name = "Costo", orientation = "v", measure = df_w['Medida'], x = df_w['Concepto'], y = df_w['Monto'],
+            text = ["+1.3", "+2.0", "+1.0", "+0.8", "+3.4", "8.5"], textposition = "outside",
+            connector = {"line":{"color":"white"}}, decreasing = {"marker":{"color":"green"}},
+            increasing = {"marker":{"color":"#ff4444"}}, totals = {"marker":{"color":"#33b5e5"}}
         ))
-        fig_w = layout_blanco(fig_w, "Evolución del Costo Acumulado")
-        fig_w.update_traces(textfont_color='white', textfont_size=12)
+        fig_w = layout_blanco(fig_w, "")
+        fig_w.update_traces(textfont_color='white')
         st.plotly_chart(fig_w, use_container_width=True)
 
     with c_info:
-        st.markdown("#### 📖 Historia de los Retrasos")
+        st.markdown("#### 📖 Hitos Clave")
         st.markdown("""
         <div class="glass-card">
-        <b>2014:</b> Se firma contrato EPC con Técnicas Reunidas (España).<br><br>
-        <b>2017:</b> Emisión de bonos por $2,000M. Se detectan unidades auxiliares no presupuestadas.<br><br>
-        <b>2020:</b> Pandemia COVID-19 paraliza obras. Costos fijos siguen corriendo.<br><br>
-        <b>2022:</b> Inicio de pruebas graduales. Crisis de liquidez por pago de deuda.<br><br>
-        <b>2024:</b> Operación plena, pero con carga financiera crítica.
+        <b>2014:</b> Firma EPC Técnicas Reunidas.<br><br>
+        <b>2017:</b> Bonos $2,000M emitidos.<br><br>
+        <b>2020:</b> Paralización COVID-19.<br><br>
+        <b>2022:</b> Crisis de liquidez.<br><br>
+        <b>2024:</b> Operación plena.
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("---")
-
-    # --- 3. PIE CHART Y GANTT ---
     c_pie, c_time = st.columns(2)
-    
     with c_pie:
-        st.markdown("**🏦 ¿Quién financió esto?**")
+        st.markdown("**🏦 Estructura de Financiamiento**")
         df_f = get_talara_funding()
         fig_p = px.pie(df_f, values='Monto_B', names='Fuente', color_discrete_sequence=px.colors.sequential.RdBu)
         fig_p = layout_blanco(fig_p, "")
@@ -266,89 +258,83 @@ elif st.session_state.pagina_actual == 'talara':
         st.plotly_chart(fig_p, use_container_width=True)
 
     with c_time:
-        st.markdown("**⏳ Cronograma: Planificado vs Real**")
+        st.markdown("**⏳ Cronograma Real**")
         df_gantt = pd.DataFrame([
             dict(Task="Plan Original", Start='2014-01-01', Finish='2019-12-31', Color='Plan'),
             dict(Task="Ejecución Real", Start='2014-01-01', Finish='2023-12-31', Color='Real')
         ])
         fig_g = px.timeline(df_gantt, x_start="Start", x_end="Finish", y="Task", color="Color", color_discrete_map={'Plan': '#00C851', 'Real': '#ff4444'})
-        fig_g = layout_blanco(fig_g, "Desviación de Tiempo (4 años de retraso)")
+        fig_g = layout_blanco(fig_g, "")
         st.plotly_chart(fig_g, use_container_width=True)
 
 # ==================================================
 # VISTA 3: DASHBOARD
 # ==================================================
 elif st.session_state.pagina_actual == 'dashboard':
-    moneda_simbolo = "$" if st.session_state.moneda == "USD ($)" else "S/."
-    
-    st.title(f"⚡ Monitor Financiero Integral ({st.session_state.moneda})")
+    moneda_sim = "$" if st.session_state.moneda == "USD ($)" else "S/."
+    st.title(f"⚡ Monitor Financiero ({st.session_state.moneda})")
     col_back, _ = st.columns([1, 6])
     with col_back:
         if st.button("⬅ Volver"): navegar_a('home')
 
-    st.markdown("#### 1. Indicadores Clave & Variación Anual")
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("💵 Caja Disponible", f"{moneda_simbolo} 15.4 M", "-12% vs 2023", border=True)
-    k2.metric("🛢️ Precio WTI", "$76.50", "+4.5% vs 2023", border=True)
-    k3.metric("📉 Deuda Total", f"{moneda_simbolo} 8.5 B", "+3.6% vs 2023", border=True)
-    k4.metric("📊 EBITDA Ajustado", f"{moneda_simbolo} 120 M", "+8.2% vs 2023", border=True)
+    k1.metric("💵 Caja", f"{moneda_sim} 15.4 M", "-12%", border=True)
+    k2.metric("🛢️ WTI", "$76.50", "+4.5%", border=True)
+    k3.metric("📉 Deuda", f"{moneda_sim} 8.5 B", "+3.6%", border=True)
+    k4.metric("📊 EBITDA", f"{moneda_sim} 120 M", "+8.2%", border=True)
 
     st.markdown("---")
-    st.markdown("#### 2. Evolución Financiera (Ingresos YoY)")
-    
     df_fin = get_dashboard_data()
     df_rank = get_rankings()
 
     c_main, c_side = st.columns([2, 1])
     with c_main:
+        st.markdown("**Ingresos vs Gastos (YoY)**")
         fig_bar = go.Figure()
-        fig_bar.add_trace(go.Bar(x=df_fin['Mes'], y=df_fin['2024'], name='Ingresos 2024', marker_color='#00C851'))
-        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['2023'], name='Ingresos 2023', line=dict(color='white', width=2, dash='dash')))
-        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['EBITDA'], name='EBITDA Actual', fill='tozeroy', line=dict(color='#33b5e5', width=0), opacity=0.3))
-        fig_bar = layout_blanco(fig_bar, "Comparativa Ingresos: 2023 vs 2024")
+        fig_bar.add_trace(go.Bar(x=df_fin['Mes'], y=df_fin['2024'], name='2024', marker_color='#00C851'))
+        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['2023'], name='2023', line=dict(color='white', dash='dash')))
+        fig_bar.add_trace(go.Scatter(x=df_fin['Mes'], y=df_fin['EBITDA'], name='EBITDA', fill='tozeroy', line=dict(color='#33b5e5', width=0), opacity=0.3))
+        fig_bar = layout_blanco(fig_bar, "")
         fig_bar.update_layout(barmode='overlay', height=400)
         st.plotly_chart(fig_bar, use_container_width=True)
 
     with c_side:
-        st.markdown("**🏆 Ranking: Centros de Costo**")
+        st.markdown("**🏆 Centros de Costo**")
         fig_rank = go.Figure()
         fig_rank.add_trace(go.Bar(
             y=df_rank['Unidad'], x=df_rank['Gasto_M'], orientation='h',
             marker_color=['#ff4444', '#ffbb33', '#00C851', '#33b5e5', '#aa66cc'],
             text=df_rank['Cambio_Anual'], textposition='auto', textfont_color='white'
         ))
-        fig_rank = layout_blanco(fig_rank, "Top 5 Gastos (Millones)")
-        fig_rank.update_layout(height=400, margin=dict(l=10, r=10, t=40, b=10))
+        fig_rank = layout_blanco(fig_rank, "")
+        fig_rank.update_layout(height=400)
         st.plotly_chart(fig_rank, use_container_width=True)
 
     st.markdown("---")
     c_risk, c_table = st.columns([1, 2])
     with c_risk:
+        st.markdown("**Nivel de Riesgo**")
         fig_gauge = go.Figure(go.Indicator(
-            mode = "gauge+number", value = 35, 
-            title = {'text': "Nivel de Estrés Financiero", 'font': {'color': 'white'}},
-            number = {'font': {'color': 'white'}},
+            mode = "gauge+number", value = 35, number = {'font': {'color': 'white'}},
             gauge = {
                 'axis': {'range': [0, 100], 'tickcolor': 'white'}, 'bar': {'color': "#ff4444"},
                 'steps': [{'range': [0, 50], 'color': "rgba(0, 255, 0, 0.2)"}, {'range': [80, 100], 'color': "rgba(255, 0, 0, 0.2)"}],
                 'threshold': {'line': {'color': "white", 'width': 4}, 'thickness': 0.75, 'value': 85}
             }
         ))
-        fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), height=300)
+        fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), height=250)
         st.plotly_chart(fig_gauge, use_container_width=True)
     
     with c_table:
-        st.markdown("#### 📋 Detalle de Pasivos por Banco (Ranking)")
+        st.markdown("#### 📋 Pasivos Bancarios")
         df_bancos = pd.DataFrame({
-            'Institución': ['Banco Nación', 'Bonos Internacionales', 'Banco Extranjero A', 'Banco Local B'],
-            'Monto Deuda': [2500, 4000, 1200, 800],
-            'Tasa Interés': ['4.5%', '7.2%', '6.1%', '5.8%'],
-            'Vencimiento': ['2030', '2047', '2026', '2025']
+            'Banco': ['Nación', 'Bonos Int.', 'Extranjero A', 'Local B'],
+            'Deuda': [2500, 4000, 1200, 800], 'Tasa': ['4.5%', '7.2%', '6.1%', '5.8%'], 'Vence': ['2030', '2047', '2026', '2025']
         })
         st.dataframe(df_bancos, use_container_width=True, hide_index=True)
 
 # ==================================================
-# VISTA 4: CHAT PETROLITO
+# VISTA 4: CHAT
 # ==================================================
 elif st.session_state.pagina_actual == 'chat':
     st.title("🤖 Petrolito: Tu Asesor Financiero")
@@ -356,49 +342,34 @@ elif st.session_state.pagina_actual == 'chat':
 
     chat_container = st.container()
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "¡Hola! Soy Petrolito. Conozco toda la historia financiera de la empresa. ¿En qué puedo ayudarte hoy?"}]
+        st.session_state.messages = [{"role": "assistant", "content": "Hola, soy Petrolito. ¿En qué puedo ayudarte hoy?"}]
 
     with chat_container:
         for msg in st.session_state.messages:
             avatar = "🧑‍💻" if msg["role"] == "user" else "🤖"
             st.chat_message(msg["role"], avatar=avatar).write(msg["content"])
 
-    if prompt := st.chat_input("Pregúntale a Petrolito..."):
+    if prompt := st.chat_input("Escribe aquí..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with chat_container:
             st.chat_message("user", avatar="🧑‍💻").write(prompt)
         
         resp = "Procesando..."
-        with st.spinner("Petrolito está pensando..."):
+        with st.spinner("Pensando..."):
             time.sleep(1)
-            if "deuda" in prompt.lower(): resp = "La deuda asciende a $8.5 Billones. Petrolito te informa que gran parte son Bonos emitidos en 2017 y 2021."
-            elif "sobrecosto" in prompt.lower() or "costo" in prompt.lower(): resp = "El sobrecosto es significativo: de $1.3B iniciales a más de $8.5B. Esto se debe a intereses, retrasos por pandemia y unidades auxiliares no previstas."
-            else: resp = "Interesante consulta. Basado en mis registros históricos, esa métrica requiere análisis. ¿Te gustaría ver el desglose de Talara?"
+            if "deuda" in prompt.lower(): resp = "La deuda es de $8.5B. Principalmente Bonos 2047."
+            elif "talara" in prompt.lower(): resp = "Talara costó $8.5B total. Operativa pero con alta carga financiera."
+            else: resp = "Interesante. Revisa el dashboard para más detalles."
         
         st.session_state.messages.append({"role": "assistant", "content": resp})
         with chat_container:
             st.chat_message("assistant", avatar="🤖").write(resp)
 
     st.markdown("---")
-    col_sugg, col_benef = st.columns(2)
-    with col_sugg:
-        st.markdown("#### 💡 Preguntas para Petrolito")
-        st.markdown("""
-        <div class="glass-card">
-            <ul style="list-style-type: none; padding: 0; margin: 0;">
-                <li style="margin-bottom: 10px;">🔹 <i>"¿Por qué costó tanto Talara?"</i></li>
-                <li style="margin-bottom: 10px;">🔹 <i>"¿Cuándo se pagan los bonos?"</i></li>
-                <li style="margin-bottom: 10px;">🔹 <i>"¿Cuánto retraso tuvo la obra?"</i></li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col_benef:
-        st.markdown("#### 🚀 ¿Por qué consultar a Petrolito?")
-        st.markdown("""
-        <div class="glass-card" style="border-left: 4px solid #38BDF8;">
-            <b>🧠 Memoria Total:</b> Recuerda cada dólar gastado desde 2014.<br><br>
-            <b>⚡ Auditoría Flash:</b> Explica sobrecostos en segundos.<br><br>
-            <b>🤝 Visión 360:</b> Cruza datos de operación con deuda financiera.
-        </div>
-        """, unsafe_allow_html=True)
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("#### 💡 Sugerencias")
+        st.markdown("<div class='glass-card'>🔹 <i>'¿Deuda actual?'</i><br>🔹 <i>'¿Sobrecosto Talara?'</i></div>", unsafe_allow_html=True)
+    with c2:
+        st.markdown("#### 🚀 Beneficios")
+        st.markdown("<div class='glass-card'>🧠 <b>Memoria 2014-2025</b><br>⚡ <b>Análisis en tiempo real</b></div>", unsafe_allow_html=True)
