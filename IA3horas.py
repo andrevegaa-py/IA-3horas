@@ -2,302 +2,288 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import pydeck as pdk
 import time
 import re
 
 # ==============================================================================
-# 1. CONFIGURACIÓN VISUAL (MODO DASHBOARD CHAT)
+# 1. CONFIGURACIÓN VISUAL (MODO GPT-4 ENTERPRISE)
 # ==============================================================================
 st.set_page_config(
-    page_title="Petrolito AI | Visual Intelligence",
+    page_title="Petrolito AI | Senior Analyst",
     layout="wide",
-    page_icon="📊",
+    page_icon="🧠",
     initial_sidebar_state="collapsed"
 )
 
-# Estilos CSS Avanzados (Botones, Burbujas, Menús)
+# Estilos CSS para inmersión total y lectura profesional
 st.markdown("""
 <style>
-    /* Layout */
-    .block-container { padding-top: 1.5rem !important; padding-bottom: 9rem !important; max-width: 950px !important; }
-    [data-testid="stAppViewContainer"] { background-color: #0B0F19; }
-    
-    /* Burbujas */
-    .chat-bubble {
-        padding: 20px 24px;
-        border-radius: 16px;
-        margin-bottom: 20px;
-        line-height: 1.6;
-        font-family: 'Segoe UI', sans-serif;
-        font-size: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    /* Layout Limpio */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 8rem !important;
+        max-width: 900px !important;
     }
+    [data-testid="stAppViewContainer"] {
+        background-color: #0F172A; /* Dark Slate Blue */
+    }
+    
+    /* Burbujas de Chat Profesionales */
+    .chat-bubble {
+        padding: 24px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        line-height: 1.7;
+        font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+        font-size: 16px;
+        color: #E2E8F0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
     .user-bubble {
-        background: #334155;
+        background-color: #334155; /* Slate 700 */
         border: 1px solid #475569;
-        color: #F8FAFC;
         margin-left: 20%;
         text-align: right;
     }
+    
     .bot-bubble {
-        background: #151B2B;
-        border-left: 4px solid #F59E0B; /* Amber para Visuales */
-        color: #E2E8F0;
-        margin-right: 5%;
+        background-color: #1E293B; /* Slate 800 */
+        border-left: 4px solid #10B981; /* Verde GPT */
     }
 
-    /* Títulos dentro del chat */
-    .bot-bubble h3 { color: #FCD34D !important; margin: 0 0 10px 0; font-size: 20px; font-weight: 700; }
-    .bot-bubble strong { color: #F59E0B; }
-    
-    /* MENÚ DE GRÁFICOS (Botones Estilizados) */
-    .menu-header { color: #94A3B8; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-top: 10px; margin-bottom: 5px; }
-    
-    div.stButton > button {
-        width: 100%;
-        background-color: rgba(30, 41, 59, 0.8) !important;
-        border: 1px solid #334155 !important;
-        color: #E2E8F0 !important;
-        border-radius: 8px !important;
-        text-align: left !important;
-        padding: 10px 15px !important;
-        font-size: 14px !important;
-        transition: all 0.2s ease !important;
-    }
-    div.stButton > button:hover {
-        border-color: #F59E0B !important;
-        color: #F59E0B !important;
-        background-color: rgba(245, 158, 11, 0.1) !important;
-    }
+    /* Formato de Texto Avanzado */
+    .bot-bubble h3 { color: #34D399 !important; margin-top: 0; font-size: 20px; font-weight: 700; }
+    .bot-bubble strong { color: #38BDF8; font-weight: 600; }
+    .bot-bubble ul { margin-bottom: 15px; padding-left: 20px; }
+    .bot-bubble li { margin-bottom: 8px; }
+    .kpi-box { background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; color: #34D399; font-weight: bold; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .alert-box { background: rgba(239, 68, 68, 0.1); padding: 2px 6px; border-radius: 4px; color: #F87171; font-weight: bold; border: 1px solid rgba(239, 68, 68, 0.2); }
 
     /* Input Flotante */
     .stChatInput {
-        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 800px !important; z-index: 9999;
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 800px !important;
+        z-index: 9999;
     }
+    
+    /* Ocultar elementos innecesarios */
+    header, footer, #MainMenu {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. CEREBRO INTEGRAL (CONOCIMIENTO + CATÁLOGO VISUAL)
+# 2. CEREBRO FINANCIERO AVANZADO (LÓGICA DIRECTA)
 # ==============================================================================
 
 if 'memoria' not in st.session_state:
     st.session_state.memoria = {
-        "wti": 76.5,
-        "produccion": 95.0,
-        "deuda": 8500
+        "wti": 76.5,          # Precio Barril Real
+        "produccion": 95.0,   # Producción NRT
+        "deuda_total": 8500,  # Millones USD
+        "deficit_caja": 2200, # Capital de Trabajo Negativo
+        "ebitda_meta": 667    # Proyección 2025
     }
 
 class PetrolitoBrain:
     def __init__(self):
-        # 1. Base de Conocimiento (Texto)
-        self.knowledge = {
-            "historia": "Desde 1969 hasta la privatización de los 90 (venta de Solgas/Transoceánica). Hoy buscamos recuperar la integración vertical.",
-            "deuda": "Deuda total de **$8.5 Billones**. Déficit de capital de trabajo de -$2.2B. Bonos con vencimiento 2032/2047.",
-            "talara": "Nueva Refinería Talara (NRT): 95 KBPD, tecnología Flexicoking, margen objetivo >$10/bbl."
-        }
-        
-        # 2. Catálogo de Gráficos Disponibles (Menú Estructurado)
-        self.visual_catalog = {
-            "📉 Finanzas & Deuda": [
-                {"label": "Composición de Deuda ($8.5B)", "id": "pie_deuda"},
-                {"label": "Déficit de Capital de Trabajo", "id": "bar_deficit"},
-                {"label": "Perfil de Vencimientos (Bonos)", "id": "line_vencimientos"}
-            ],
-            "🏭 Operaciones (NRT)": [
-                {"label": "Waterfall de Costos NRT", "id": "waterfall_costos"},
-                {"label": "Eficiencia Operativa vs Meta", "id": "gauge_eficiencia"},
-                {"label": "Mapa de Activos Críticos", "id": "map_geo"}
-            ],
-            "🔮 Proyecciones Generativas": [
-                {"label": "Simulación EBITDA 2025 (Dinámico)", "id": "bar_ebitda_sim"},
-                {"label": "Sensibilidad Flujo de Caja", "id": "line_sensibilidad"}
-            ]
-        }
+        # Base de Datos de Archivos Reales
+        self.files_db = pd.DataFrame({
+            "Documento": ["Estados Financieros Auditados 2023 (PwC)", "Clasificación de Riesgo (Fitch/Apoyo)", "Plan de Reestructuración 2025"],
+            "Fecha": ["Mayo 2024", "Junio 2024", "Dic 2024"],
+            "Hallazgo Clave": ["Pérdida Neta -$822M", "Rating 'CCC+' (Junk)", "Meta EBITDA +$667M"]
+        })
 
-    # --- APRENDIZAJE ---
-    def aprender(self, prompt):
+    # --- 1. APRENDIZAJE SILENCIOSO (ACTUALIZA SIN MOLESTAR) ---
+    def actualizar_memoria(self, prompt):
         prompt = prompt.lower()
-        msgs = []
-        if re.search(r'(wti|precio).*?(\d{2,3})', prompt):
-            val = float(re.search(r'(wti|precio).*?(\d{2,3})', prompt).group(2))
+        msg = ""
+        
+        # Detectar WTI
+        match_wti = re.search(r'(wti|precio|barril).*?(\d{2,3})', prompt)
+        if match_wti:
+            val = float(match_wti.group(2))
             st.session_state.memoria['wti'] = val
-            msgs.append(f"WTI ${val}")
-        if re.search(r'(producci|carga).*?(\d{2,3})', prompt):
-            val = float(re.search(r'(producci|carga).*?(\d{2,3})', prompt).group(2))
-            st.session_state.memoria['produccion'] = val
-            msgs.append(f"Prod {val}k")
-        return msgs
+            # Recalcular proyecciones automáticamente
+            st.session_state.memoria['ebitda_meta'] = 667 + (val - 76.5) * 15 
+            msg = f"🔄 *He recalibrado mis modelos financieros con un WTI de ${val}.*"
 
-    # --- GENERADOR DE GRÁFICOS (BAJO DEMANDA) ---
-    def renderizar_grafico(self, chart_id):
+        # Detectar Producción
+        match_prod = re.search(r'(producci|carga|refin).*?(\d{2,3})', prompt)
+        if match_prod:
+            val = float(match_prod.group(2))
+            st.session_state.memoria['produccion'] = val
+            msg = f"🔄 *Modelo operativo ajustado a {val} KBPD.*"
+            
+        return msg
+
+    # --- 2. GENERACIÓN DE VISUALES (PLOTLY) ---
+    def crear_grafico(self, tipo):
         mem = st.session_state.memoria
         
-        if chart_id == "pie_deuda":
-            fig = go.Figure(go.Pie(labels=['Bonos Lp', 'Crédito España', 'Corto Plazo (Déficit)'], values=[3000, 1300, 2200], hole=0.5, marker_colors=['#3B82F6', '#8B5CF6', '#EF4444']))
-            fig.update_layout(title="Estructura Pasivos", template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=300)
+        if tipo == "deuda_breakdown":
+            fig = go.Figure(go.Pie(
+                labels=['Bonos (Largo Plazo)', 'Crédito España (CESCE)', 'Déficit Capital Trabajo', 'Otros'],
+                values=[3000, 1300, 2200, 2000],
+                hole=0.4,
+                marker_colors=['#3B82F6', '#8B5CF6', '#EF4444', '#64748B']
+            ))
+            fig.update_layout(title="<b>Estructura de Deuda ($8.5B)</b>", template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=280, margin=dict(t=40,b=20,l=20,r=20))
             return fig
+
+        elif tipo == "waterfall_ebitda":
+            # Proyección generativa
+            base_2023 = -104
+            recuperacion_ops = 400
+            efecto_precio = (mem['wti'] - 70) * 10
+            meta_final = base_2023 + recuperacion_ops + efecto_precio + 200 # Ajuste eficiencia
             
-        elif chart_id == "bar_deficit":
-            fig = go.Figure(go.Bar(x=['Caja Disponible', 'Obligaciones Corto Plazo'], y=[500, 2700], marker_color=['#10B981', '#EF4444']))
-            fig.update_layout(title="Brecha de Liquidez (-$2.2B)", template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=300)
+            fig = go.Figure(go.Waterfall(
+                orientation="v", measure=["relative", "relative", "relative", "relative", "total"],
+                x=["Real 2023", "Eficiencia Ops", "Impacto WTI", "Optimización", "Proyección 2025"],
+                y=[base_2023, recuperacion_ops, efecto_precio, 200, 0],
+                connector={"line":{"color":"white"}},
+                decreasing={"marker":{"color":"#EF4444"}}, increasing={"marker":{"color":"#10B981"}}, totals={"marker":{"color":"#3B82F6"}}
+            ))
+            fig.update_layout(title=f"<b>Drivers EBITDA 2025 (WTI ${mem['wti']})</b>", template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=300, margin=dict(t=40,b=20,l=20,r=20))
             return fig
 
-        elif chart_id == "waterfall_costos":
-            fig = go.Figure(go.Waterfall(orientation="v", measure=["relative", "relative", "relative", "total"], x=["Base", "EPC", "Intereses", "Total"], y=[1300, 3800, 3400, 0], connector={"line":{"color":"white"}}))
-            fig.update_layout(title="Sobrecostos NRT", template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=300)
-            return fig
-
-        elif chart_id == "gauge_eficiencia":
+        elif tipo == "eficiencia_nrt":
             val = (mem['produccion'] / 95) * 100
-            fig = go.Figure(go.Indicator(mode="gauge+number", value=val, title={'text': "Carga NRT (%)"}, gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "#F59E0B"}}))
-            fig.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=250)
+            fig = go.Figure(go.Indicator(
+                mode = "gauge+number", value = val, title = {'text': "Utilización NRT (%)"},
+                gauge = {'axis': {'range': [0, 100]}, 'bar': {'color': "#10B981" if val > 90 else "#F59E0B"}}
+            ))
+            fig.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=250, margin=dict(t=30,b=20,l=20,r=20))
             return fig
-            
-        elif chart_id == "bar_ebitda_sim":
-            # Fórmula Generativa
-            base = 150 + (mem['wti'] - 70)*10 + (mem['produccion'] - 80)*5
-            fig = go.Figure(go.Bar(x=['Escenario Actual'], y=[base], marker_color='#F59E0B', text=[f"${base:.0f}M"], textposition='auto'))
-            fig.update_layout(title=f"EBITDA Proyectado (WTI ${mem['wti']})", template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=300)
-            return fig
-            
-        elif chart_id == "map_geo":
-            layer = pdk.Layer("ScatterplotLayer", data=pd.DataFrame([{"lat": -4.58, "lon": -81.27}, {"lat": -5.5, "lon": -78.5}]), get_position=["lon", "lat"], get_color=[245, 158, 11], get_radius=10000, pickable=True)
-            view = pdk.ViewState(latitude=-5.0, longitude=-80.0, zoom=5)
-            return pdk.Deck(layers=[layer], initial_view_state=view, map_style="mapbox://styles/mapbox/dark-v10")
-            
+
         return None
 
-    # --- CEREBRO CONVERSACIONAL ---
-    def procesar(self, prompt):
+    # --- 3. CEREBRO DE RESPUESTA DIRECTA (SENIOR ANALYST) ---
+    def generar_respuesta(self, prompt):
         prompt_low = prompt.lower()
-        cambios = self.aprender(prompt)
+        mem = st.session_state.memoria
         
-        response = {"texto": "", "show_menu": False, "visual": None}
-        header = f"📝 *Memoria Actualizada: {', '.join(cambios)}*\n\n" if cambios else ""
+        # Actualización silenciosa
+        feedback = self.actualizar_memoria(prompt)
+        header = f"{feedback}\n\n" if feedback else ""
+        
+        response = {"texto": "", "visual": None, "extra_visual": None}
 
-        # INTENCIÓN: SOLICITAR GRÁFICOS / MENÚ
-        if any(x in prompt_low for x in ["grafico", "visual", "chart", "tabla", "ver datos", "opciones", "menu"]):
+        # --- INTENCIÓN: FINANZAS / DEUDA / CAJA ---
+        if any(x in prompt_low for x in ["deuda", "dinero", "caja", "bonos", "financiera", "situacion"]):
+            liquidez_status = "CRÍTICO" if mem['deficit_caja'] > 1500 else "ESTABLE"
+            
             response["texto"] = (
-                f"{header}### 📊 Centro de Visualización\n"
-                f"Tengo acceso a toda la data en tiempo real. He clasificado los gráficos disponibles por área estratégica.\n\n"
-                f"**Selecciona qué visualización deseas generar ahora mismo:**"
+                f"{header}### 📉 Análisis de Posición Financiera\n"
+                f"La situación es compleja pero estructurada. Al cierre auditado, enfrentamos una deuda total de **$8.5 Billones**.\n\n"
+                f"El punto de dolor no son los Bonos (que vencen en 2032/2047), sino el **Capital de Trabajo**. "
+                f"Actualmente tenemos un <span class='alert-box'>Déficit de Caja de ${mem['deficit_caja']} Millones</span>. "
+                f"Esto significa que nuestras obligaciones a corto plazo (pagos a proveedores de crudo) superan nuestros activos líquidos inmediatos.\n\n"
+                f"**Estrategia en curso:** El MEF está otorgando garantías para permitir líneas de crédito revolventes mientras la Refinería alcanza flujo positivo."
             )
-            response["show_menu"] = True
+            response["visual"] = self.crear_grafico("deuda_breakdown")
             return response
 
-        # INTENCIÓN: DEUDA
-        if "deuda" in prompt_low or "financiera" in prompt_low:
+        # --- INTENCIÓN: PROYECCIONES / FUTURO / 2025 ---
+        if any(x in prompt_low for x in ["proyeccion", "futuro", "2025", "ebitda", "ganancia", "meta"]):
+            ebitda_calc = int(mem['ebitda_meta'])
+            
             response["texto"] = (
-                f"{header}### 📉 Estado Financiero\n"
-                f"{self.knowledge['deuda']}\n\n"
-                f"Actualmente el déficit de caja es crítico. Con tu WTI de **${st.session_state.memoria['wti']}**, mejoramos márgenes, pero no liquidez inmediata."
+                f"{header}### 🚀 Outlook 2025: Camino a la Rentabilidad\n"
+                f"Basado en los fundamentales actuales y tu escenario de **WTI ${mem['wti']}**, proyectamos un cambio de tendencia radical.\n\n"
+                f"La meta oficial es revertir las pérdidas de 2023 (-$822M) y alcanzar un <span class='kpi-box'>EBITDA Positivo de ${ebitda_calc} Millones</span> en 2025.\n"
+                f"Este salto se sustenta en tres pilares:\n"
+                f"1. Operación plena de la Unidad de Flexicoking (margen >$10/bbl).\n"
+                f"2. Reducción de importación de combustibles refinados.\n"
+                f"3. Estabilización del tipo de cambio."
             )
-            response["visual"] = self.renderizar_grafico("pie_deuda")
+            response["visual"] = self.crear_grafico("waterfall_ebitda")
             return response
 
-        # INTENCIÓN: TALARA
-        if "talara" in prompt_low or "nrt" in prompt_low:
+        # --- INTENCIÓN: OPERACIONES / TALARA ---
+        if any(x in prompt_low for x in ["talara", "nrt", "refineria", "operacion", "produccion", "carga"]):
+            utilizacion = int((mem['produccion'] / 95) * 100)
+            
             response["texto"] = (
-                f"{header}### 🏭 Operaciones NRT\n"
-                f"{self.knowledge['talara']}\n"
-                f"Operando a **{st.session_state.memoria['produccion']} KBPD**. El factor de utilización es clave para diluir costos fijos."
+                f"{header}### 🏭 Nueva Refinería Talara (NRT)\n"
+                f"El activo más importante de la empresa está operando con una carga de **{mem['produccion']} KBPD**.\n\n"
+                f"Esto representa un factor de utilización del <span class='kpi-box'>{utilizacion}%</span>. "
+                f"Técnicamente, la refinería ya completó su periodo de arranque. El reto ahora es **logístico**: "
+                f"asegurar el suministro continuo de crudo pesado para alimentar la unidad de Flexicoking y maximizar el margen de refino."
             )
-            response["visual"] = self.renderizar_grafico("gauge_eficiencia")
+            response["visual"] = self.crear_grafico("eficiencia_nrt")
             return response
 
-        # DEFAULT GEN-AI
+        # --- INTENCIÓN: ARCHIVOS / DATOS DUROS ---
+        if any(x in prompt_low for x in ["archivo", "reporte", "excel", "pdf", "descargar"]):
+            response["texto"] = "### 📂 Repositorio Oficial\nHe extraído los documentos clave directamente de la base de datos financiera:"
+            response["extra_visual"] = self.files_db
+            return response
+
+        # --- DEFAULT: CAPACIDAD GENERATIVA ---
+        # Si no encaja en nada específico, responde con inteligencia general usando las variables
         response["texto"] = (
-            f"{header}Hola. Soy **Petrolito AI**.\n"
-            f"Tengo toda la data histórica y financiera de Petroperú integrada. Aprendo de tus inputs (WTI/Producción).\n\n"
-            f"💬 *Puedes preguntarme detalles o pedirme: **'Muéstrame los gráficos disponibles'** para ver el catálogo visual.*"
+            f"{header}Soy **Petrolito AI**. Mi análisis integral indica lo siguiente:\n\n"
+            f"Con un precio de petróleo en **${mem['wti']}**, tenemos una oportunidad única para maximizar los ingresos de la Nueva Refinería Talara, "
+            f"siempre que mantengamos la producción por encima de los **{mem['produccion']} KBPD**.\n\n"
+            f"El riesgo principal sigue siendo la liquidez de corto plazo (-$2.2B). "
+            f"¿Deseas que profundice en la **Estrategia de Deuda** o en las **Proyecciones de Flujo**?"
         )
         return response
 
 brain = PetrolitoBrain()
 
 # ==============================================================================
-# 3. GESTIÓN DE CHAT Y CALLBACKS
+# 3. MOTOR DE CHAT (STREAMLIT)
 # ==============================================================================
 
 if "mensajes" not in st.session_state:
     st.session_state.mensajes = []
-    st.session_state.mensajes.append({"role": "assistant", "content": {"texto": "👋 **Hola.** Soy tu analista integral.\nSi quieres ver datos duros, escribe: **'Ver gráficos'** y te mostraré mi catálogo.", "show_menu": False, "visual": None}})
-
-def click_grafico(chart_id, label):
-    # Simula que el usuario pidió ese gráfico específico
-    st.session_state.mensajes.append({"role": "user", "content": f"Genera el gráfico: {label}"})
-    # Genera la respuesta del bot con el gráfico
-    visual = brain.renderizar_grafico(chart_id)
+    # Mensaje inicial directo
     st.session_state.mensajes.append({
-        "role": "assistant", 
+        "role": "assistant",
         "content": {
-            "texto": f"### ✅ Visualización Generada: {label}\nAquí tienes el análisis solicitado basado en los parámetros actuales.",
-            "visual": visual,
-            "show_menu": False
+            "texto": "👋 **Hola. Soy Petrolito AI.**\n\nEstoy conectado a la data auditada de Petroperú. Puedo analizar **Deuda**, **Operaciones** o **Proyecciones**.\nNo necesitas menús. Simplemente pregúntame lo que necesitas saber.",
+            "visual": None, "extra_visual": None
         }
     })
 
-# ==============================================================================
-# 4. RENDERIZADO DEL CHAT
-# ==============================================================================
+# Renderizado del Chat
+st.markdown("<h2 style='text-align:center;'>🧠 Petrolito <span style='color:#34D399;'>Direct Core</span></h2>", unsafe_allow_html=True)
 
-st.markdown("<h2 style='text-align:center;'>🤖 Petroperú <span style='color:#F59E0B;'>Visual Core</span></h2>", unsafe_allow_html=True)
-
-# Loop principal de mensajes
-for i, msg in enumerate(st.session_state.mensajes):
+for msg in st.session_state.mensajes:
     if msg["role"] == "user":
         st.markdown(f"""<div class="chat-bubble user-bubble">{msg["content"]}</div>""", unsafe_allow_html=True)
     else:
         pkg = msg["content"]
-        # 1. Texto
         st.markdown(f"""
         <div class="chat-bubble bot-bubble">
-            <div style="display:flex; align-items:center; margin-bottom:10px;">
-                <span style="font-size:24px; margin-right:10px;">🤖</span>
-                <span style="font-weight:bold; color:#F59E0B;">PETROLITO</span>
+            <div style="display:flex; align-items:center; margin-bottom:15px;">
+                <span style="font-size:24px; margin-right:12px;">🤖</span>
+                <span style="font-weight:700; color:#34D399;">PETROLITO</span>
             </div>
             {pkg['texto']}
         </div>
         """, unsafe_allow_html=True)
         
-        # 2. Visuales (Si aplica)
+        # Renderizado de Gráficos Integrado en la respuesta (Directo, sin pedirlo)
         if pkg["visual"]:
-            if isinstance(pkg["visual"], go.Figure):
-                st.plotly_chart(pkg["visual"], use_container_width=True)
-            elif isinstance(pkg["visual"], pdk.Deck):
-                st.pydeck_chart(pkg["visual"], use_container_width=True)
-        
-        # 3. MENÚ DE GRÁFICOS (Solo si show_menu=True y es el último mensaje)
-        if pkg.get("show_menu") and i == len(st.session_state.mensajes) - 1:
-            st.markdown("---")
-            catalog = brain.visual_catalog
-            
-            # Crear columnas para el layout del menú
-            c1, c2, c3 = st.columns(3)
-            cols = [c1, c2, c3]
-            
-            for idx, (categoria, items) in enumerate(catalog.items()):
-                with cols[idx]:
-                    st.markdown(f"<div class='menu-header'>{categoria}</div>", unsafe_allow_html=True)
-                    for item in items:
-                        # Botones que accionan el gráfico
-                        if st.button(f"📊 {item['label']}", key=f"btn_{i}_{item['id']}"):
-                            click_grafico(item['id'], item['label'])
-                            st.rerun()
+            st.plotly_chart(pkg["visual"], use_container_width=True)
+        if pkg["extra_visual"] is not None:
+            st.dataframe(pkg["extra_visual"], use_container_width=True, hide_index=True)
 
-# ==============================================================================
-# 5. INPUT USUARIO
-# ==============================================================================
-
-if prompt := st.chat_input("Pide 'Gráficos', 'Deuda' o actualiza datos (Ej: 'WTI 85')..."):
+# Input y Lógica
+if prompt := st.chat_input("Pregunta directamente (Ej: 'Dame la proyección 2025' o 'Analiza la deuda')"):
     st.session_state.mensajes.append({"role": "user", "content": prompt})
     st.rerun()
 
 if st.session_state.mensajes and st.session_state.mensajes[-1]["role"] == "user":
-    with st.spinner("Procesando..."):
-        time.sleep(0.5)
-        resp = brain.procesar(st.session_state.mensajes[-1]["content"])
+    with st.spinner("Procesando análisis..."):
+        time.sleep(0.5) # Velocidad GPT
+        resp = brain.generar_respuesta(st.session_state.mensajes[-1]["content"])
         st.session_state.mensajes.append({"role": "assistant", "content": resp})
         st.rerun()
