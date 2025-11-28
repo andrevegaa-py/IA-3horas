@@ -7,21 +7,21 @@ import time
 import re
 
 # ==============================================================================
-# 1. CONFIGURACIÓN VISUAL (MODO NEURAL CHAT)
+# 1. CONFIGURACIÓN VISUAL (MODO PETROLITO)
 # ==============================================================================
 st.set_page_config(
-    page_title="Petroperú Neural AI | Self-Learning",
+    page_title="Petrolito AI | Asistente Financiero",
     layout="wide",
-    page_icon="🧠",
+    page_icon="🤖",
     initial_sidebar_state="collapsed"
 )
 
-# CSS Profesional para experiencia tipo ChatGPT/Gemini
+# CSS Profesional
 st.markdown("""
 <style>
     .block-container {
         padding-top: 2rem !important;
-        padding-bottom: 6rem !important; /* Espacio para el input */
+        padding-bottom: 6rem !important;
         max-width: 950px !important;
     }
     [data-testid="stAppViewContainer"] {
@@ -50,17 +50,16 @@ st.markdown("""
     
     .bot-bubble {
         background-color: #1E293B;
-        border-left: 4px solid #8B5CF6; /* Violeta Neural */
+        border-left: 4px solid #00C851; /* Verde Petrolito */
         color: #E2E8F0;
         margin-right: 5%;
         border-radius: 12px 12px 12px 0;
     }
 
     /* ESTILOS DE TEXTO RICOS */
-    .bot-bubble h3 { color: #A78BFA !important; margin: 0 0 10px 0; font-size: 18px; }
-    .bot-bubble strong { color: #34D399; font-weight: 600; } /* Verde Esmeralda */
-    .highlight { background-color: rgba(139, 92, 246, 0.2); padding: 2px 6px; border-radius: 4px; color: #D8B4FE; }
-
+    .bot-bubble h3 { color: #38BDF8 !important; margin: 0 0 10px 0; font-size: 18px; }
+    .bot-bubble strong { color: #00C851; font-weight: 600; }
+    
     /* INPUT FLOTANTE */
     .stChatInput {
         position: fixed;
@@ -74,7 +73,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. MOTOR DE APRENDIZAJE (MACHINE LEARNING CORE)
+# 2. CEREBRO DE PETROLITO (MACHINE LEARNING CORE)
 # ==============================================================================
 
 if 'memory_state' not in st.session_state:
@@ -85,12 +84,12 @@ if 'memory_state' not in st.session_state:
         "deuda_total": 8.5,   # Billones USD
         "tasa_interes": 8.5,  # Tasa base %
         "tema_actual": None,  # Contexto de conversación
-        "usuario_nombre": "Gerente"
+        "usuario_nombre": "Usuario" # Nombre genérico solicitado
     }
 
-class NeuralBrain:
+class PetrolitoBrain:
     def __init__(self):
-        # Base de Conocimiento Estática (Archivos y Datos Fijos)
+        # Base de Conocimiento Estática
         self.files_db = pd.DataFrame({
             "ID": ["DOC-001", "DOC-002", "DOC-003"],
             "Documento": ["Auditoría Costos NRT (PwC)", "Estructura Deuda Bonistas", "Plan Cierre Brechas"],
@@ -99,47 +98,41 @@ class NeuralBrain:
 
     # --- MÓDULO DE APRENDIZAJE (NLP PARSER) ---
     def aprender_del_usuario(self, prompt):
-        """
-        Analiza el texto del usuario para extraer nuevas variables y actualizar
-        el modelo mental de la IA (Session State).
-        """
+        """Petrolito aprende nuevos datos de la conversación."""
         prompt = prompt.lower()
         aprendido_algo = False
         mensaje_aprendizaje = ""
 
         # 1. Detectar cambio de WTI
-        # Ej: "El WTI ahora está en 90" o "Cambia el precio a 85.5"
         match_wti = re.search(r'(wti|precio|barril).*?(\d{2,3}(\.\d+)?)', prompt)
         if match_wti:
             nuevo_valor = float(match_wti.group(2))
             st.session_state.memory_state['wti'] = nuevo_valor
             aprendido_algo = True
-            mensaje_aprendizaje += f"✅ He actualizado mi modelo: **WTI = ${nuevo_valor}**.\n"
+            mensaje_aprendizaje += f"📝 Entendido. He actualizado mi memoria: **WTI = ${nuevo_valor}**.\n"
 
         # 2. Detectar cambio de Producción
-        # Ej: "La producción bajó a 80"
         match_prod = re.search(r'(producci.n|refineria).*?(\d{2,3})', prompt)
         if match_prod:
             nuevo_valor = float(match_prod.group(2))
             st.session_state.memory_state['produccion'] = nuevo_valor
             aprendido_algo = True
-            mensaje_aprendizaje += f"✅ Registro operativo actualizado: **Carga NRT = {nuevo_valor} KBPD**.\n"
+            mensaje_aprendizaje += f"📝 Registro operativo actualizado: **Producción = {nuevo_valor} KBPD**.\n"
 
         # 3. Detectar contexto
         if "deuda" in prompt: st.session_state.memory_state['tema_actual'] = "deuda"
         elif "talara" in prompt: st.session_state.memory_state['tema_actual'] = "talara"
-        elif "mapa" in prompt: st.session_state.memory_state['tema_actual'] = "geo"
 
         return aprendido_algo, mensaje_aprendizaje
 
-    # --- GENERADORES VISUALES DINÁMICOS (Se adaptan a lo aprendido) ---
+    # --- GENERADORES VISUALES DINÁMICOS ---
     def _generar_simulacion_ebitda(self):
         wti = st.session_state.memory_state['wti']
         prod = st.session_state.memory_state['produccion']
         
-        # Lógica ML: El EBITDA depende de WTI y Producción
-        factor_wti = (wti - 60) * 3  # Sensibilidad
-        factor_prod = (prod / 95)    # Eficiencia
+        # Fórmula interna de Petrolito
+        factor_wti = (wti - 60) * 3 
+        factor_prod = (prod / 95)   
         base_ebitda = 100 * factor_prod + factor_wti
         
         meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul (Proy)']
@@ -148,22 +141,21 @@ class NeuralBrain:
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=meses, y=valores, mode='lines+markers', 
-                                 line=dict(color='#8B5CF6', width=4), name='EBITDA Dinámico'))
-        fig.update_layout(title=f"Proyección EBITDA (Escenario: WTI ${wti} | Prod {prod}k)", 
+                                 line=dict(color='#00C851', width=4), name='Flujo Petrolito'))
+        fig.update_layout(title=f"Proyección Dinámica (WTI ${wti} | Prod {prod}k)", 
                           template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=300)
         return fig
 
     def _generar_waterfall_talara(self):
-        # Este gráfico es histórico, no cambia con WTI, pero se mantiene por solicitud de "no perder datos"
         fig = go.Figure(go.Waterfall(
             name = "Costo NRT", orientation = "v",
             measure = ["relative", "relative", "relative", "relative", "total"],
             x = ["Base 2014", "EPC Adicional", "Financiero", "Retrasos", "Total"],
             y = [1300, 1500, 2400, 800, 0],
             connector = {"line":{"color":"white"}},
-            decreasing = {"marker":{"color":"#34D399"}},
-            increasing = {"marker":{"color":"#F87171"}},
-            totals = {"marker":{"color":"#38BDF8"}}
+            decreasing = {"marker":{"color":"#00C851"}},
+            increasing = {"marker":{"color":"#FF4444"}},
+            totals = {"marker":{"color":"#33B5E5"}}
         ))
         fig.update_layout(title="Auditoría de Costos NRT (MM USD)", template="plotly_dark", 
                           paper_bgcolor='rgba(0,0,0,0)', height=300)
@@ -173,87 +165,86 @@ class NeuralBrain:
     def procesar_interaccion(self, prompt):
         response = {"texto": "", "visuales": []}
         
-        # 1. FASE DE APRENDIZAJE
+        # 1. APRENDIZAJE
         aprendido, msg_aprendizaje = self.aprender_del_usuario(prompt)
-        
-        # 2. GENERACIÓN DE RESPUESTA
-        prompt_low = prompt.lower()
         state = st.session_state.memory_state
+        prompt_low = prompt.lower()
         
         if aprendido:
-            response["texto"] = f"{msg_aprendizaje}\nHe recalculado todas las proyecciones financieras basándome en los nuevos parámetros. ¿Qué indicador desea revisar ahora?"
-            # Mostramos automáticamente el impacto del aprendizaje
+            response["texto"] = f"{msg_aprendizaje} He recalculado mis proyecciones con estos nuevos datos. ¿Qué más necesitas saber?"
             response["visuales"].append(("grafico", self._generar_simulacion_ebitda()))
             return response
 
+        # 2. RESPUESTAS POR TEMA
+        
         # Intención: TALARA
-        if "talara" in prompt_low or state['tema_actual'] == "talara" and ("detalle" in prompt_low or "grafico" in prompt_low):
+        if "talara" in prompt_low or (state['tema_actual'] == "talara" and any(x in prompt_low for x in ["ver", "grafico", "detalle"])):
             response["texto"] = (
-                f"### 🏭 Estado Situacional Talara (NRT)\n"
-                f"Considerando su input actual de **Producción: {state['produccion']} KBPD**.\n\n"
-                "La refinería opera bajo régimen de optimización de margen. "
-                "A continuación presento la estructura de costos históricos y la proyección de flujo operativa ajustada a sus variables."
+                f"### 🏭 Nueva Refinería Talara (NRT)\n"
+                f"Actualmente tengo registrada una producción de **{state['produccion']} miles de barriles por día**.\n\n"
+                "Aquí tienes el desglose histórico de costos y mi proyección de flujo operativa actualizada:"
             )
             response["visuales"].append(("grafico", self._generar_waterfall_talara()))
             response["visuales"].append(("grafico", self._generar_simulacion_ebitda()))
             return response
 
         # Intención: FINANZAS / SIMULACIÓN
-        if any(x in prompt_low for x in ["ebitda", "flujo", "caja", "finanza", "proyeccion"]):
+        if any(x in prompt_low for x in ["ebitda", "flujo", "caja", "finanza", "proyeccion", "dinero"]):
             response["texto"] = (
-                f"### 🔮 Simulación Financiera en Tiempo Real\n"
-                f"Parámetros del modelo:\n"
-                f"• **WTI:** ${state['wti']}/bbl\n"
-                f"• **Producción:** {state['produccion']} KBPD\n"
-                f"• **Deuda:** ${state['deuda_total']} B\n\n"
-                "El algoritmo predice el siguiente comportamiento de EBITDA para el próximo trimestre:"
+                f"### 🔮 Proyección Financiera (Motor Petrolito)\n"
+                f"Estoy calculando el EBITDA basado en:\n"
+                f"• **Precio WTI:** ${state['wti']}\n"
+                f"• **Producción:** {state['produccion']} KBPD\n\n"
+                "Según mi modelo de Machine Learning, este es el comportamiento esperado:"
             )
             response["visuales"].append(("grafico", self._generar_simulacion_ebitda()))
             return response
 
         # Intención: ARCHIVOS
-        if "archivo" in prompt_low or "documento" in prompt_low:
-            response["texto"] = "### 📂 Data Room\nAccediendo al repositorio seguro. Estos son los archivos disponibles:"
+        if any(x in prompt_low for x in ["archivo", "documento", "descargar", "excel", "pdf"]):
+            response["texto"] = "### 📂 Acceso a Documentación\nClaro, aquí tienes los archivos oficiales disponibles en mi base de datos:"
             response["visuales"].append(("tabla", self.files_db))
             return response
 
-        # Default / Conversación
+        # Default / Conversación Abierta
         response["texto"] = (
-            f"Entendido, {state['usuario_nombre']}. Mi modelo actual tiene un WTI de **${state['wti']}** y Producción de **{state['produccion']}k**.\n\n"
-            "💡 **Puedes enseñarme nuevos datos.** Prueba diciéndome:\n"
-            "- *'El WTI subió a 85 dólares'*\n"
-            "- *'La producción cayó a 60'*\n"
-            "- *'Dame el reporte de Talara'*"
+            f"Hola, aquí **Petrolito** a tu servicio. 👋\n\n"
+            f"Estoy monitoreando el WTI a **${state['wti']}** y la refinería al **{int(state['produccion']/95*100)}%** de capacidad.\n\n"
+            "Puedes pedirme cualquier información, por ejemplo:\n"
+            "🔹 *'Muéstrame los costos de Talara'*\n"
+            "🔹 *'Calcula el EBITDA si el WTI sube a 85'*\n"
+            "🔹 *'Dame los archivos de deuda'*\n"
+            "¿En qué te ayudo hoy?"
         )
         return response
 
-brain = NeuralBrain()
+brain = PetrolitoBrain()
 
 # ==============================================================================
-# 3. GESTIÓN DEL CHAT (SESSION STATE & LOOP)
+# 3. GESTIÓN DEL CHAT (STATE)
 # ==============================================================================
 
 if "mensajes" not in st.session_state:
     st.session_state.mensajes = []
-    # Mensaje de bienvenida proactivo
-    bienvenida = {
+    # Saludo Inicial de Petrolito
+    saludo = {
         "texto": (
-            "👋 **Sistema Neural Iniciado.**\n\n"
-            "Soy una IA con capacidad de **aprendizaje en sesión**. No uso datos fijos; aprendo de lo que me dices.\n"
-            "Actualmente asumo un WTI de **$76.5** y Producción al **95%**.\n\n"
-            "**¿Deseas actualizar estos parámetros o ver un reporte?**"
+            "🤖 **¡Hola! Soy Petrolito.**\n\n"
+            "Soy tu asistente inteligente enfocado en finanzas y operaciones. "
+            "Aprendo mientras conversamos. Ahora mismo asumo un WTI de **$76.5**.\n\n"
+            "**¿Qué información necesitas consultar hoy?**"
         ),
         "visuales": []
     }
-    st.session_state.mensajes.append({"role": "assistant", "contenido": bienvenida})
+    st.session_state.mensajes.append({"role": "assistant", "contenido": saludo})
 
 # ==============================================================================
 # 4. RENDERIZADO DEL CHAT
 # ==============================================================================
 
-# Encabezado Flotante
-st.markdown("<h2 style='text-align:center;'>🧠 Petroperú <span style='color:#8B5CF6;'>Neural Core</span></h2>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align:center; color:#64748B;'>Parámetros Activos: WTI <b>${st.session_state.memory_state['wti']}</b> | Prod <b>{st.session_state.memory_state['produccion']}k</b></p>", unsafe_allow_html=True)
+# Encabezado Petrolito
+st.markdown("<h2 style='text-align:center;'>🤖 <span style='color:#00C851;'>Petrolito</span> AI Core</h2>", unsafe_allow_html=True)
+st.markdown(f"<p style='text-align:center; color:#64748B;'>Memoria Activa: WTI <b>${st.session_state.memory_state['wti']}</b> | Prod <b>{st.session_state.memory_state['produccion']}k</b></p>", unsafe_allow_html=True)
 
 for msg in st.session_state.mensajes:
     if msg["role"] == "user":
@@ -265,13 +256,13 @@ for msg in st.session_state.mensajes:
         <div class="chat-bubble bot-bubble">
             <div style="display:flex; align-items:center; margin-bottom:8px;">
                 <span style="font-size:20px; margin-right:10px;">🤖</span>
-                <span style="font-weight:bold; color:#A78BFA;">AI LEARNING MODEL</span>
+                <span style="font-weight:bold; color:#00C851;">PETROLITO</span>
             </div>
             {pkg['texto']}
         </div>
         """, unsafe_allow_html=True)
         
-        # Render Visuales (Fuera de la burbuja para que sean interactivos)
+        # Render Visuales (Fuera de HTML para interactividad)
         if pkg["visuales"]:
             with st.container():
                 for tipo, data in pkg["visuales"]:
@@ -284,15 +275,15 @@ for msg in st.session_state.mensajes:
 # 5. INPUT Y PROCESAMIENTO
 # ==============================================================================
 
-if prompt := st.chat_input("Ej: 'El WTI está en 90' o 'Muestra Talara'"):
-    # 1. Agregar usuario
+if prompt := st.chat_input("Escribe aquí (Ej: 'El WTI subió a 90' o 'Ver archivos')"):
+    # 1. Guardar mensaje usuario
     st.session_state.mensajes.append({"role": "user", "contenido": prompt})
     st.rerun()
 
 # Respuesta Inmediata
 if st.session_state.mensajes and st.session_state.mensajes[-1]["role"] == "user":
-    with st.spinner("🧠 Procesando nuevos datos y actualizando redes neuronales..."):
-        time.sleep(0.8) # Latencia para realismo
+    with st.spinner("Petrolito está pensando..."):
+        time.sleep(0.5) 
         
         ultima_entrada = st.session_state.mensajes[-1]["contenido"]
         respuesta_ia = brain.procesar_interaccion(ultima_entrada)
