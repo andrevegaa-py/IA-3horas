@@ -2,332 +2,258 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import pydeck as pdk
 import time
 import re
 
 # ==============================================================================
-# 1. CONFIGURACIÓN VISUAL (MODO ENTERPRISE CHAT)
+# 1. CONFIGURACIÓN VISUAL (ESTILO ENTERPRISE)
 # ==============================================================================
 st.set_page_config(
-    page_title="Petrolito AI | Master Core",
+    page_title="Petrolito AI | Financial Intelligence",
     layout="wide",
-    page_icon="🧠",
+    page_icon="📉",
     initial_sidebar_state="collapsed"
 )
 
-# CSS Avanzado para Interfaz de Chat Inmersiva
+# Estilos CSS avanzados
 st.markdown("""
 <style>
-    /* Layout */
-    .block-container {
-        padding-top: 2rem !important;
-        padding-bottom: 7rem !important;
-        max-width: 950px !important;
-    }
-    [data-testid="stAppViewContainer"] {
-        background-color: #0B0F19; /* Azul Noche */
-    }
+    .block-container { padding-top: 2rem !important; padding-bottom: 7rem !important; max-width: 950px !important; }
+    [data-testid="stAppViewContainer"] { background-color: #0F172A; }
     
-    /* Burbujas */
-    .chat-bubble {
-        padding: 24px;
-        border-radius: 16px;
-        margin-bottom: 24px;
-        line-height: 1.6;
-        font-family: 'Segoe UI', sans-serif;
-        font-size: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .user-bubble {
-        background-color: #334155;
-        border: 1px solid #475569;
-        color: #F8FAFC;
-        margin-left: 15%;
-        text-align: right;
-        border-bottom-right-radius: 4px;
-    }
-    .bot-bubble {
-        background-color: #1E293B;
-        border-left: 4px solid #00C851; /* Verde Petrolito */
-        color: #E2E8F0;
-        margin-right: 5%;
-        border-bottom-left-radius: 4px;
-    }
-
-    /* Elementos Internos */
-    .bot-bubble h3 { color: #38BDF8 !important; margin: 0 0 10px 0; font-size: 20px; }
-    .bot-bubble strong { color: #00C851; font-weight: 600; }
-    .bot-bubble ul { margin-bottom: 15px; }
-    .bot-bubble li { margin-bottom: 8px; }
+    .chat-bubble { padding: 25px; border-radius: 12px; margin-bottom: 25px; line-height: 1.6; font-family: 'Segoe UI', sans-serif; font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .user-bubble { background-color: #334155; color: #F8FAFC; margin-left: 20%; text-align: right; border-bottom-right-radius: 2px; }
+    .bot-bubble { background-color: #1E293B; border-left: 5px solid #E11D48; /* Rojo Financiero */ color: #E2E8F0; margin-right: 5%; border-bottom-left-radius: 2px; }
     
-    /* Pregunta Estratégica */
-    .strategic-q {
-        display: block;
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px solid #334155;
-        color: #38BDF8;
-        font-weight: bold;
-        font-style: italic;
-    }
-
-    /* Input Flotante */
-    .stChatInput {
-        position: fixed;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 800px !important;
-        z-index: 9999;
-    }
+    .bot-bubble h3 { color: #F43F5E !important; margin: 0 0 15px 0; font-size: 22px; font-weight: 700; }
+    .bot-bubble strong { color: #34D399; font-weight: 600; }
+    .data-highlight { background: rgba(225, 29, 72, 0.1); border: 1px solid #E11D48; color: #FDA4AF; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+    
+    .strategic-q { display: block; margin-top: 20px; padding-top: 15px; border-top: 1px solid #334155; color: #38BDF8; font-weight: bold; font-style: italic; }
+    .stChatInput { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 800px !important; z-index: 9999; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. CEREBRO INTEGRAL (CONOCIMIENTO + APRENDIZAJE + VISUALES)
+# 2. CEREBRO FINANCIERO (DATA REAL AUDITADA)
 # ==============================================================================
 
 if 'memoria' not in st.session_state:
-    st.session_state.memoria = {
-        "wti": 76.5,
-        "produccion": 95.0,
-        "tema_actual": "inicio"
-    }
+    st.session_state.memoria = {"wti": 75.0, "produccion": 95.0}
 
 class PetrolitoBrain:
     def __init__(self):
-        # --- BASE DE DATOS MASIVA (HISTORIA, FINANZAS, OPS) ---
-        self.knowledge_base = {
-            "historia": """
-            **📜 Historia Corporativa:**
-            * **Origen (1969):** Creada por Velasco Alvarado tras expropiar a la IPC en Talara. Misión: Soberanía energética.
-            * **Crisis de los 90:** Privatización fragmentada. Se vendieron activos rentables: Flota (Transoceánica), Gas (Solgas) y Grifos, perdiendo la integración vertical.
-            * **Actualidad:** Ley 30130 (2013) impulsó la Nueva Refinería Talara (NRT) para modernizar el desulfurizado.
-            """,
-            
-            "deuda": """
-            **💸 Estructura Financiera ($8.5 Billones):**
-            * **Bonos Soberanos:** ~$3,000 MM (Vencimientos 2032 y 2047). Tasas fijas pero altas.
-            * **Crédito CESCE:** ~$1,300 MM (Garantía española para la refinería).
-            * **Corto Plazo:** El problema crítico. Compramos crudo al contado y vendemos a crédito (descalce de liquidez).
-            * **Rating:** Calificación presionada (CCC+/B) que encarece el crédito.
-            """,
-            
-            "operaciones": """
-            **🏭 Nueva Refinería Talara (NRT):**
-            * **Capacidad:** 95,000 Barriles/Día (KBPD).
-            * **Unidad Clave:** Flexicoking (Convierte residuales baratos en productos caros).
-            * **Margen Objetivo:** $10-$12/bbl (vs $4 de refinería antigua).
-            
-            **🛢️ Oleoducto Norperuano (ONP):**
-            * Activo crítico para traer crudo de la selva, pero sufre constantes cortes por terceros y geodinámica.
-            """
+        # --- BASE DE DATOS REAL (HALLAZGOS) ---
+        self.financial_data = {
+            "resultados": {
+                "2023": -822, # Millones USD (Pérdida Neta)
+                "2024_est": -774, # Estimado cierre
+                "2025_proy": -200 # Proyección optimista (reducción pérdida)
+            },
+            "ebitda": {
+                "2023": -104, # Negativo real
+                "2024_est": 150, # Recuperación leve
+                "2025_meta": 667 # Meta Oficial 2025
+            },
+            "deuda_real": {
+                "total": 8500,
+                "bonos": 3000,
+                "cesce": 1300,
+                "working_capital_deficit": 2200 # Hueco de liquidez
+            }
         }
         
-        # Base de Archivos
         self.files_db = pd.DataFrame({
-            "Documento": ["EEFF Auditados 2023", "Perfil Deuda Detallado", "Plan Operativo NRT"],
-            "Tipo": ["PDF", "XLSX", "PDF"],
-            "Fecha": ["2024-03", "2024-05", "2024-06"]
+            "Reporte Oficial": [
+                "Estados Financieros Auditados 2023 (PwC)", 
+                "Reporte Resultados Q3 2024", 
+                "Proyección Flujo de Caja 2025-2030",
+                "Clasificación Riesgo Apoyo & Asociados 2024"
+            ],
+            "Fecha": ["02/05/2024", "15/11/2024", "01/12/2024", "24/05/2024"],
+            "Hallazgo Clave": [
+                "Pérdida Neta $822M / Opinión con Salvedades",
+                "Recuperación Margen Operativo",
+                "Meta EBITDA $667M para 2025",
+                "Rating bajó a A+(pe) por soporte estatal"
+            ]
         })
 
-    # --- APRENDIZAJE (NLP) ---
     def aprender(self, prompt):
         prompt = prompt.lower()
         msg = ""
         actualizo = False
         
-        # Detectar WTI
-        match_wti = re.search(r'(wti|precio|crudo).*?(\d{2,3}(\.\d+)?)', prompt)
+        match_wti = re.search(r'(wti|precio).*?(\d{2,3})', prompt)
         if match_wti:
             val = float(match_wti.group(2))
             st.session_state.memoria['wti'] = val
-            msg = f"📝 *He recalibrado mis modelos: WTI ajustado a ${val}.*"
-            actualizo = True
-            
-        # Detectar Producción
-        match_prod = re.search(r'(producci|carga|refin).*?(\d{2,3})', prompt)
-        if match_prod:
-            val = float(match_prod.group(2))
-            st.session_state.memoria['produccion'] = val
-            msg = f"📝 *Registro operativo actualizado: Carga NRT a {val} KBPD.*"
+            msg = f"📝 *Ajuste de Mercado: WTI recalibrado a ${val}.*"
             actualizo = True
             
         return actualizo, msg
 
-    # --- VISUALES DINÁMICOS ---
+    # --- GENERADORES GRÁFICOS (PROYECCIONES REALES) ---
     def generar_visual(self, tipo):
-        wti = st.session_state.memoria['wti']
-        prod = st.session_state.memoria['produccion']
-        
-        if tipo == "simulacion_ebitda":
-            # Modelo: EBITDA mejora con WTI y Prod alta
-            base = 100 + (wti - 70)*2 + (prod - 95)
-            vals = [base*0.8, base, base*1.2]
+        if tipo == "proyeccion_ebitda":
+            # Gráfico de Recuperación EBITDA 2023-2025
+            years = ['2023 (Real)', '2024 (Est.)', '2025 (Proyección)']
+            vals = [self.financial_data['ebitda']['2023'], 
+                    self.financial_data['ebitda']['2024_est'], 
+                    self.financial_data['ebitda']['2025_meta']]
+            
+            colors = ['#EF4444', '#F59E0B', '#10B981'] # Rojo, Amarillo, Verde
+            
             fig = go.Figure(go.Bar(
-                x=["Escenario Pesimista", "Base (Tu Input)", "Optimista"],
-                y=vals, marker_color=['#EF4444', '#00C851', '#38BDF8'],
-                text=[f"${v:.0f}M" for v in vals], textposition='auto'
+                x=years, y=vals, marker_color=colors,
+                text=[f"${v}M" for v in vals], textposition='auto'
             ))
-            fig.update_layout(title=f"Proyección EBITDA (WTI ${wti})", template="plotly_dark", 
-                              paper_bgcolor='rgba(0,0,0,0)', height=300)
+            fig.update_layout(
+                title="🚀 Proyección Oficial EBITDA: El Salto 2025",
+                template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=300,
+                yaxis_title="Millones USD"
+            )
             return fig
 
-        elif tipo == "mapa_activos":
-            # Mapa Geoespacial con PyDeck
-            layer = pdk.Layer(
-                "ScatterplotLayer",
-                data=pd.DataFrame([
-                    {"name": "Refinería Talara", "lat": -4.58, "lon": -81.27, "color": [0, 200, 81]},
-                    {"name": "Estación 5 ONP", "lat": -5.5, "lon": -78.5, "color": [255, 68, 68]}
-                ]),
-                get_position=["lon", "lat"], get_color="color", get_radius=10000, pickable=True
+        elif tipo == "estructura_deuda":
+            # Pie Chart de la Deuda Real
+            labels = ['Bonos Soberanos', 'Crédito CESCE', 'Déficit Capital Trabajo', 'Otras Obligaciones']
+            values = [3000, 1300, 2200, 2000]
+            
+            fig = go.Figure(go.Pie(
+                labels=labels, values=values, hole=0.4,
+                marker_colors=['#3B82F6', '#8B5CF6', '#EF4444', '#64748B']
+            ))
+            fig.update_layout(
+                title="🚨 Anatomía de la Deuda ($8.5B)",
+                template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', height=300
             )
-            view = pdk.ViewState(latitude=-5.0, longitude=-80.0, zoom=5, pitch=40)
-            return pdk.Deck(layers=[layer], initial_view_state=view, map_style="mapbox://styles/mapbox/dark-v10", tooltip={"text": "{name}"})
+            return fig
+            
+        elif tipo == "flujo_caja":
+             # Proyección Cash Flow Operativo
+             wti = st.session_state.memoria['wti']
+             base_2025 = 5000 # Meta oficial $5B
+             ajuste = (wti - 75) * 50 # Sensibilidad
+             final = base_2025 + ajuste
+             
+             fig = go.Figure(go.Indicator(
+                mode = "number+delta",
+                value = final,
+                delta = {'reference': 5000, 'relative': True, 'valueformat': '.1%'},
+                title = {"text": f"Flujo de Caja Operativo 2025 (Est. WTI ${wti})"},
+                number = {'prefix': "$", 'suffix': " M"}
+            ))
+             fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', height=200, font={'color': "white"})
+             return fig
 
         return None
 
-    # --- LÓGICA CONVERSACIONAL (ENTREVISTADOR) ---
+    # --- MOTOR DE RESPUESTA ---
     def procesar(self, prompt):
         prompt_low = prompt.lower()
         actualizo, msg_learning = self.aprender(prompt)
         response = {"texto": "", "visual": None, "tipo_visual": None}
-        
         prefix = msg_learning + "\n\n" if actualizo else ""
         
-        # 1. TEMA: FINANZAS / DEUDA
-        if any(x in prompt_low for x in ["deuda", "bonos", "financiera", "dinero", "caja"]):
+        # TEMA 1: PROYECCIONES 2025 / EBITDA
+        if any(x in prompt_low for x in ["proyeccion", "futuro", "2025", "ebitda", "ganancia"]):
             response["texto"] = (
-                f"{prefix}### 📉 Análisis Financiero\n"
-                f"{self.knowledge_base['deuda']}\n\n"
-                f"Actualmente, con tu escenario de **WTI ${st.session_state.memoria['wti']}**, la presión de caja es significativa.\n"
-                "<span class='strategic-q'>🤔 Pregunta estratégica: Dado que el servicio de deuda absorbe el flujo, ¿crees que la solución pasa por un nuevo aporte de capital del Estado o por reestructurar los bonos 2032?</span>"
+                f"{prefix}### 🔮 Proyecciones Financieras 2025\n"
+                f"La gerencia ha establecido una meta agresiva de recuperación:\n\n"
+                f"* **EBITDA 2025:** Se proyecta alcanzar **$667 Millones** (positivo), saliendo de los números rojos de 2023 (-$104M).\n"
+                f"* **Flujo de Caja:** Meta de ingresos operativos de **$5,000 Millones**.\n"
+                f"* **Pérdida Neta:** Se espera reducir el déficit de -$800M a niveles manejables.\n\n"
+                f"<span class='strategic-q'>📊 Análisis: Para lograr este EBITDA de $667M, necesitamos que la refinería mantenga el 100% de carga sin paradas. ¿Crees que el riesgo operativo está cubierto?</span>"
             )
-            response["visual"] = self.generar_visual("simulacion_ebitda")
+            response["visual"] = self.generar_visual("proyeccion_ebitda")
             response["tipo_visual"] = "plotly"
 
-        # 2. TEMA: OPERACIONES / TALARA
-        elif any(x in prompt_low for x in ["talara", "operacion", "refineria", "flexicoking", "produccion"]):
+        # TEMA 2: DEUDA / ESTADOS FINANCIEROS
+        elif any(x in prompt_low for x in ["deuda", "financiero", "perdida", "balance", "capital"]):
             response["texto"] = (
-                f"{prefix}### 🏭 Estado de la NRT\n"
-                f"{self.knowledge_base['operaciones']}\n\n"
-                f"Estamos operando a **{st.session_state.memoria['produccion']} KBPD**. La unidad de Flexicoking está optimizando residuales.\n"
-                "<span class='strategic-q'>🔧 Consulta técnica: Para maximizar el margen, ¿deberíamos priorizar la producción de Turbo (aviones) o Diésel vehicular en este trimestre?</span>"
+                f"{prefix}### 📉 Estado de Situación Financiera (Auditado)\n"
+                f"La situación es delicada. Los reportes confirman:\n"
+                f"1.  **Déficit de Capital de Trabajo:** <span class='data-highlight'>-$2,200 Millones</span>. (Hueco de liquidez inmediato).\n"
+                f"2.  **Pérdidas Acumuladas:** 2023 cerró con -$822M y 2024 bordea los -$774M.\n"
+                f"3.  **Soporte:** Fitch bajó la calificación a A+(pe) asumiendo soporte del Estado.\n\n"
+                f"<span class='strategic-q'>🤔 Dilema: Tenemos $2.2B de déficit de caja a corto plazo. ¿Priorizamos pagar a proveedores de crudo o el servicio de bonos?</span>"
             )
-            response["visual"] = self.generar_visual("mapa_activos")
-            response["tipo_visual"] = "deck"
+            response["visual"] = self.generar_visual("estructura_deuda")
+            response["tipo_visual"] = "plotly"
 
-        # 3. TEMA: HISTORIA
-        elif any(x in prompt_low for x in ["historia", "pasado", "origen", "1969"]):
-            response["texto"] = (
-                f"{prefix}{self.knowledge_base['historia']}\n\n"
-                "<span class='strategic-q'>🧐 Reflexión: Muchos analistas dicen que perder los grifos y el gas en los 90 nos dejó vulnerables. ¿Coincides en que recuperar la integración vertical es la clave?</span>"
-            )
-
-        # 4. TEMA: ARCHIVOS / DATA ROOM
-        elif any(x in prompt_low for x in ["archivo", "documento", "descargar"]):
-            response["texto"] = (
-                "### 📂 Data Room Corporativo\n"
-                "He accedido al servidor seguro. Aquí están los reportes oficiales disponibles:"
-            )
+        # TEMA 3: ARCHIVOS / REPORTES
+        elif any(x in prompt_low for x in ["reporte", "archivo", "descargar", "auditado", "pwc"]):
+            response["texto"] = "### 📂 Data Room: Estados Financieros Auditados\nHe compilado los reportes oficiales encontrados (PwC, Apoyo & Asociados):"
             response["visual"] = self.files_db
             response["tipo_visual"] = "dataframe"
 
-        # 5. CONVERSACIÓN FLUIDA / SOLO APRENDIZAJE
-        elif actualizo:
-            response["texto"] = (
-                f"{prefix}He actualizado mis tableros de control con tus nuevos datos.\n"
-                "Ahora que hemos ajustado las variables macroeconómicas...\n"
-                "<span class='strategic-q'>📊 ¿Quieres que proyecte el nuevo Flujo de Caja o prefieres revisar el impacto operativo en Talara?</span>"
-            )
-            response["visual"] = self.generar_visual("simulacion_ebitda")
-            response["tipo_visual"] = "plotly"
-
-        # 6. FALLBACK INTELIGENTE
+        # TEMA 4: DEFAULT (RESUMEN EJECUTIVO)
         else:
             response["texto"] = (
-                f"Hola. Soy **Petrolito AI**, tu socio estratégico.\n\n"
-                f"Tengo en memoria un WTI de **${st.session_state.memoria['wti']}** y la refinería al **{int(st.session_state.memoria['produccion']/95*100)}%**.\n"
-                "Puedo analizar:\n"
-                "* La deuda de $8.5B y los Bonos.\n"
-                "* La operación del Flexicoking en Talara.\n"
-                "* La historia desde 1969.\n\n"
-                "<span class='strategic-q'>👋 ¿Por dónde quieres empezar el análisis hoy?</span>"
+                f"{prefix}Hola. Soy **Petrolito AI**, tu analista financiero.\n\n"
+                f"He procesado la data real: Tuvimos pérdidas de **$822M en 2023**, pero proyectamos un **EBITDA de $667M para 2025**.\n"
+                f"Tengo simulaciones listas con tu WTI de **${st.session_state.memoria['wti']}**.\n\n"
+                f"<span class='strategic-q'>👋 ¿Quieres ver el gráfico de la recuperación del EBITDA o analizar el detalle de la Deuda?</span>"
             )
+            if actualizo:
+                 response["visual"] = self.generar_visual("flujo_caja")
+                 response["tipo_visual"] = "plotly"
 
         return response
 
 brain = PetrolitoBrain()
 
 # ==============================================================================
-# 3. GESTIÓN DE ESTADO
+# 3. INTERFAZ DE CHAT
 # ==============================================================================
-
 if "mensajes" not in st.session_state:
     st.session_state.mensajes = []
-    # Saludo inicial
     st.session_state.mensajes.append({
         "role": "assistant",
         "content": {
             "texto": (
-                "👋 **Bienvenido, Usuario.**\n\n"
-                "Soy Petrolito AI. Tengo cargada toda la data histórica, financiera y operativa de la empresa. "
-                "Además, aprendo de ti en tiempo real.\n\n"
-                "<span class='strategic-q'>¿Quieres revisar la situación de la Deuda o el estado de Talara?</span>"
+                "👋 **Bienvenido al Centro de Inteligencia Financiera.**\n\n"
+                "He cargado los **Estados Financieros Auditados 2023-2024** y las **Proyecciones 2025**.\n"
+                "Detecto un déficit de capital de trabajo de $2.2B, pero una meta de EBITDA positivo para el próximo año.\n\n"
+                "<span class='strategic-q'>¿Empezamos revisando las Proyecciones 2025 o la Estructura de la Deuda?</span>"
             ),
             "visual": None, "tipo_visual": None
         }
     })
 
-# ==============================================================================
-# 4. RENDERIZADO DEL CHAT
-# ==============================================================================
-
-st.markdown("<h2 style='text-align:center;'>🧠 Petroperú <span style='color:#00C851;'>AI Core</span></h2>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align:center; color:#64748B;'>Datos en Vivo: WTI <b>${st.session_state.memoria['wti']}</b> | Prod <b>{st.session_state.memoria['produccion']}k</b></p>", unsafe_allow_html=True)
+# Renderizado
+st.markdown("<h2 style='text-align:center;'>📉 Petroperú <span style='color:#E11D48;'>Financial Core</span></h2>", unsafe_allow_html=True)
 
 for msg in st.session_state.mensajes:
     if msg["role"] == "user":
         st.markdown(f"""<div class="chat-bubble user-bubble">{msg["content"]}</div>""", unsafe_allow_html=True)
     else:
         pkg = msg["content"]
-        # Render Texto Bot
         st.markdown(f"""
         <div class="chat-bubble bot-bubble">
             <div style="display:flex; align-items:center; margin-bottom:10px;">
                 <span style="font-size:24px; margin-right:10px;">🤖</span>
-                <span style="font-weight:bold; color:#00C851;">PETROLITO</span>
+                <span style="font-weight:bold; color:#E11D48;">PETROLITO</span>
             </div>
             {pkg['texto']}
         </div>
         """, unsafe_allow_html=True)
         
-        # Render Visuales (Plotly / Mapas / Tablas)
         if pkg["visual"] is not None:
             with st.container():
                 if pkg["tipo_visual"] == "plotly":
                     st.plotly_chart(pkg["visual"], use_container_width=True)
-                elif pkg["tipo_visual"] == "deck":
-                    st.pydeck_chart(pkg["visual"], use_container_width=True)
                 elif pkg["tipo_visual"] == "dataframe":
                     st.dataframe(pkg["visual"], use_container_width=True, hide_index=True)
 
-# ==============================================================================
-# 5. INPUT Y PROCESAMIENTO
-# ==============================================================================
-
-if prompt := st.chat_input("Consulta a Petrolito... (Ej: 'Hablemos de deuda' o 'El WTI está en 90')"):
+if prompt := st.chat_input("Ej: 'Ver proyecciones 2025' o 'El WTI está en 80'"):
     st.session_state.mensajes.append({"role": "user", "content": prompt})
     st.rerun()
 
 if st.session_state.mensajes and st.session_state.mensajes[-1]["role"] == "user":
-    with st.spinner("Petrolito está analizando escenarios..."):
-        time.sleep(0.7) # Simular pensamiento
-        
-        ultima_entrada = st.session_state.mensajes[-1]["content"]
-        respuesta_ia = brain.procesar(ultima_entrada)
-        
-        st.session_state.mensajes.append({"role": "assistant", "content": respuesta_ia})
+    with st.spinner("Analizando reportes auditados..."):
+        time.sleep(0.7)
+        resp = brain.procesar(st.session_state.mensajes[-1]["content"])
+        st.session_state.mensajes.append({"role": "assistant", "content": resp})
         st.rerun()
